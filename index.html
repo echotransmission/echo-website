@@ -327,15 +327,32 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 18px;
-      height: 18px;
-      background: radial-gradient(circle, rgba(220, 245, 250, 1) 0%, rgba(180, 235, 245, 0.7) 35%, rgba(150, 225, 235, 0.3) 65%, transparent 90%);
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle, rgba(220, 245, 250, 1) 0%, rgba(180, 235, 245, 0.85) 35%, rgba(150, 225, 235, 0.45) 65%, transparent 90%);
       filter: blur(2px);
-      box-shadow: 0 0 24px rgba(180, 235, 245, 0.85), 0 0 48px rgba(180, 235, 245, 0.4);
+      box-shadow: 0 0 32px rgba(180, 235, 245, 1), 0 0 60px rgba(180, 235, 245, 0.55);
       z-index: 200;
       will-change: transform, opacity;
       transform: translate3d(-100px, -100px, 0);
     }
+
+    /* Debug indicator — small flash at top-left when scroll is being polled.
+       Confirms the rAF loop is running. Remove when no longer needed. */
+    .echo-debug-pulse {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(180, 235, 245, 0.5);
+      z-index: 999;
+      pointer-events: none;
+      transition: opacity 0.15s linear;
+      opacity: 0;
+    }
+    .echo-debug-pulse.on { opacity: 1; }
     .orb-down {
       width: 40px;
       height: 40px;
@@ -401,12 +418,14 @@
       cursor: pointer;
       z-index: 2;
       transition: transform 0.32s cubic-bezier(0.55, 0.05, 0.4, 1);
-      transform: scale(0.42);
+      transform: scale(0.42) translateZ(0);
       transform-origin: center center;
+      will-change: transform;
+      isolation: isolate;
     }
     .ebubble.expanded {
       z-index: 10;
-      transform: scale(1);
+      transform: scale(1) translateZ(0);
       transition: transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
     }
     .ebubble svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -562,6 +581,7 @@
 
   <div class="orb orb-up" id="orbUp" aria-hidden="true"></div>
   <div class="orb orb-down" id="orbDown" aria-hidden="true"></div>
+  <div class="echo-debug-pulse" id="echoDebugPulse" aria-hidden="true"></div>
 
   <!-- The five glimpses — Session B -->
   <section class="glimpses" aria-label="The five glimpses">
@@ -644,9 +664,9 @@
         const sig = getSignalViewport();
         const startX = sig.x;
         const startY = sig.y;
-        orbUp.style.transform = 'translate3d(' + (startX - 9) + 'px, ' + (startY - 9) + 'px, 0)';
+        orbUp.style.transform = 'translate3d(' + (startX - 11) + 'px, ' + (startY - 11) + 'px, 0)';
         orbUp.style.opacity = '0';
-        const duration = 1100;
+        const duration = 1700;
         const startTime = performance.now();
         function frame(now) {
           const t = Math.min((now - startTime) / duration, 1);
@@ -660,9 +680,9 @@
           const omt = 1 - eased;
           const x = omt * omt * startX + 2 * omt * eased * ctrlX + eased * eased * endX;
           const y = omt * omt * startY + 2 * omt * eased * ctrlY + eased * eased * endY;
-          orbUp.style.transform = 'translate3d(' + (x - 9) + 'px, ' + (y - 9) + 'px, 0)';
+          orbUp.style.transform = 'translate3d(' + (x - 11) + 'px, ' + (y - 11) + 'px, 0)';
           let op;
-          if (t < 0.1) op = t / 0.1;
+          if (t < 0.08) op = t / 0.08;
           else if (t > 0.92) op = (1 - t) / 0.08;
           else op = 1;
           orbUp.style.opacity = String(op);
@@ -816,13 +836,29 @@
       // - Scroll past 40% of viewport: signal contracts to dissolved state.
       // - Scroll back above 40%: signal returns.
       let signalSpawned = false;
+      const debugPulse = document.getElementById('echoDebugPulse');
+      let lastScrollTop = 0;
+      let pulseCount = 0;
       function pollScrollState() {
         const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
         const viewportH = window.innerHeight;
         const dissolveThreshold = viewportH * 0.4;
 
+        // Debug pulse: brighten when scroll changes (confirms rAF is detecting scroll)
+        if (debugPulse) {
+          if (Math.abs(scrollTop - lastScrollTop) > 0.5) {
+            debugPulse.classList.add('on');
+            pulseCount = 8;
+          } else if (pulseCount > 0) {
+            pulseCount--;
+            if (pulseCount === 0) debugPulse.classList.remove('on');
+          }
+          lastScrollTop = scrollTop;
+        }
+
         if (scrollTop > 8 && !signalSpawned) {
           signalSpawned = true;
+          if (debugPulse) debugPulse.style.background = 'rgba(232, 178, 92, 1)';
           const c = getCenters();
           animateOrbUp();
           startOrbDown(c);
