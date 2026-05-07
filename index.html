@@ -330,11 +330,11 @@
       z-index: 50;
     }
     .orb-down {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       background: radial-gradient(circle, rgba(225, 248, 252, 1) 0%, rgba(190, 240, 248, 0.75) 30%, rgba(160, 228, 240, 0.35) 60%, transparent 88%);
       filter: blur(3px);
-      box-shadow: 0 0 36px rgba(180, 235, 245, 0.85);
+      box-shadow: 0 0 44px rgba(180, 235, 245, 0.85);
       z-index: 50;
     }
     .orb-down.alive {
@@ -343,12 +343,12 @@
     @keyframes orbPulse {
       0%, 100% {
         transform: scale(1);
-        box-shadow: 0 0 32px rgba(180, 235, 245, 0.7);
+        box-shadow: 0 0 44px rgba(180, 235, 245, 0.7);
         filter: blur(3px);
       }
       50% {
         transform: scale(1.18);
-        box-shadow: 0 0 52px rgba(200, 245, 252, 1);
+        box-shadow: 0 0 64px rgba(200, 245, 252, 1);
         filter: blur(2.5px);
       }
     }
@@ -365,13 +365,113 @@
       to { opacity: 0; filter: blur(4px); }
     }
 
-    /* Placeholder space below the opening sequence — replaced in Session B by the five glimpses */
-    .placeholder-section {
+    /* The five glimpses — Session B */
+    .glimpses {
       position: relative;
-      width: 100%;
-      min-height: 200vh;
       z-index: 1;
+      width: 100%;
+      padding: 60px 0 200px;
     }
+    .ebubble {
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      margin-left: -240px;
+      margin-top: -240px;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.32s cubic-bezier(0.55, 0.05, 0.4, 1);
+      transform: scale(0.42);
+      transform-origin: center center;
+    }
+    .ebubble.expanded {
+      z-index: 10;
+      transform: scale(1);
+      transition: transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .ebubble svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+    .ebubble[data-glimpse="1"] { --c: 232,178,92;  --img-warm: 252,205,118; --img-mid: 196,138,62; --img-deep: 72,46,22;  --name: rgba(252,225,182,0.92); --inv: #f6dcaa; --cyc: 7.5s; }
+    .ebubble[data-glimpse="2"] { --c: 196,90,80;   --img-warm: 220,128,98;  --img-mid: 160,72,62; --img-deep: 60,24,22;  --name: rgba(244,200,178,0.92); --inv: #efc9b6; --cyc: 8.4s; }
+    .ebubble[data-glimpse="3"] { --c: 232,138,62;  --img-warm: 248,170,98;  --img-mid: 220,128,58; --img-deep: 64,30,14; --name: rgba(252,222,180,0.92); --inv: #f8cda0; --cyc: 6.8s; }
+    .ebubble[data-glimpse="4"] { --c: 210,224,236; --img-warm: 232,242,250; --img-mid: 160,185,200; --img-deep: 38,50,60; --name: rgba(238,246,252,0.94); --inv: #f0f4f8; --cyc: 9.2s; }
+    .ebubble[data-glimpse="5"] { --c: 130,186,214; --img-warm: 150,205,228; --img-mid: 110,170,200; --img-deep: 18,38,50; --name: rgba(204,230,244,0.94); --inv: #c8e2ee; --cyc: 7.9s; }
+
+    .bubble-name-text {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      fill: var(--name);
+      transition: opacity 0.4s ease-out;
+    }
+    .ebubble.expanded .bubble-name-text { opacity: 0; }
+
+    .bubble-content-fo {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-out;
+    }
+    .ebubble.expanded .bubble-content-fo {
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.55s ease-out 0.3s;
+    }
+    .bubble-content-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 18% 16%;
+      font-family: 'Fraunces', Georgia, serif;
+      color: rgba(245,236,217,0.92);
+      box-sizing: border-box;
+    }
+    .bubble-title-line {
+      font-weight: 300;
+      font-style: italic;
+      font-size: 21px;
+      line-height: 1.4;
+      color: var(--name);
+      margin: 0 0 16px;
+      letter-spacing: 0.005em;
+    }
+    .bubble-passage-line {
+      font-weight: 300;
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: rgba(245,236,217,0.86);
+      margin: 0 0 18px;
+    }
+    .bubble-invitation-line {
+      font-weight: 300;
+      font-style: italic;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--inv);
+      margin: 0;
+      padding-top: 14px;
+      border-top: 0.5px solid rgba(245,236,217,0.2);
+    }
+
+    @keyframes echoAuraBreathe {
+      0%, 100% { opacity: 1; transform: scale(1.08); }
+      50%      { opacity: 0.32; transform: scale(0.78); }
+    }
+    @keyframes echoAuraBreatheCounter {
+      0%, 100% { opacity: 0.5; transform: scale(0.85); }
+      50%      { opacity: 1; transform: scale(1.15); }
+    }
+    @keyframes echoAuraBreatheFar {
+      0%, 100% { opacity: 0.95; transform: scale(1.12); }
+      50%      { opacity: 0.45; transform: scale(0.82); }
+    }
+    .aura-near { animation: echoAuraBreathe var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    .aura-mid  { animation: echoAuraBreatheCounter var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    .aura-far  { animation: echoAuraBreatheFar var(--cyc, 7.5s) ease-in-out infinite reverse; transform-origin: center; transform-box: fill-box; }
 
     /* Accessibility — reduced motion */
     @media (prefers-reduced-motion: reduce) {
@@ -390,6 +490,8 @@
       .field-continuous { animation: none !important; }
       .nav-mark .nav-dot { animation: none !important; }
       .orb-down.alive { animation: none !important; }
+      .aura-near, .aura-mid, .aura-far { animation: none !important; }
+      .ebubble { transition: none !important; }
     }
 
     /* Screen reader only */
@@ -441,8 +543,25 @@
   <div class="orb orb-up" id="orbUp" aria-hidden="true"></div>
   <div class="orb orb-down" id="orbDown" aria-hidden="true"></div>
 
-  <!-- Placeholder space — Session B replaces this with the five glimpses -->
-  <section class="placeholder-section" aria-hidden="true"></section>
+  <!-- The five glimpses — Session B -->
+  <section class="glimpses" aria-label="The five glimpses">
+    <div class="ebubble" data-glimpse="1" data-bypass-side="right" style="left:30%;top:300px;"></div>
+    <div class="ebubble" data-glimpse="2" data-bypass-side="left"  style="left:70%;top:840px;"></div>
+    <div class="ebubble" data-glimpse="3" data-bypass-side="right" style="left:50%;top:1380px;"></div>
+    <div class="ebubble" data-glimpse="4" data-bypass-side="right" style="left:32%;top:1920px;"></div>
+    <div class="ebubble" data-glimpse="5" data-bypass-side="left"  style="left:68%;top:2460px;"></div>
+  </section>
+
+  <!-- SVG filter definitions for the glimpse bubbles -->
+  <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
+    <defs>
+      <filter id="bub-blur-rest" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>
+      <filter id="bub-blur-clear" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1"/></filter>
+      <filter id="aura-blur-near" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+      <filter id="aura-blur-mid" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="42"/></filter>
+      <filter id="aura-blur-far" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="70"/></filter>
+    </defs>
+  </svg>
 
   <script>
     (function() {
@@ -471,6 +590,8 @@
       window.addEventListener('load', syncFieldHeight);
       window.addEventListener('resize', syncFieldHeight);
       setTimeout(syncFieldHeight, 100);
+      // Expose so the glimpse IIFE can resync after blooms expand/collapse the document
+      window.__echoSyncField = syncFieldHeight;
 
       function getCenters() {
         const sigRect = signalWrap.getBoundingClientRect();
@@ -526,8 +647,8 @@
       function startOrbDown(c) {
         orbDownTracking = true;
         orbDownStartTop = c.sigY;
-        orbDown.style.left = (c.sigX - 15) + 'px';
-        orbDown.style.top = (c.sigY - 15) + 'px';
+        orbDown.style.left = (c.sigX - 20) + 'px';
+        orbDown.style.top = (c.sigY - 20) + 'px';
         orbDown.style.opacity = '0';
         orbDown.classList.add('alive');
         const fadeStart = performance.now();
@@ -539,45 +660,102 @@
         requestAnimationFrame(fadeIn);
       }
 
-      // Asymmetric wandering path — three sines + start bias toward the left
-      function wanderingPath(progress, halfWidth) {
-        const p = Math.min(Math.max(progress, 0), 1);
-        const primary = -Math.cos(p * Math.PI * 2.3 + 0.4) * 0.55;
-        const secondary = Math.sin(p * Math.PI * 5.1 + 1.2) * 0.18;
-        const tertiary = Math.sin(p * Math.PI * 8.7 + 0.6) * 0.07;
-        const startBias = (1 - p) * -0.35;
-        const offset = (primary + secondary + tertiary + startBias) * halfWidth;
-        const maxOffset = halfWidth * 0.78;
-        return Math.max(-maxOffset, Math.min(maxOffset, offset));
+      // The orb-down's path threads around the bubbles by pre-computed bypass sides.
+      // Each bubble has a `data-bypass-side` of 'left' or 'right' indicating which side
+      // of the bubble the orb passes by. Path is built dynamically so that resizes /
+      // bubble repositions are handled.
+      const BYPASS_OFFSET = 220;
+
+      function getBubbleAbsolutePositions() {
+        const scrollTop = window.scrollY || window.pageYOffset;
+        const bubbles = document.querySelectorAll('.ebubble');
+        const positions = [];
+        bubbles.forEach(function(b) {
+          const r = b.getBoundingClientRect();
+          const bypassSide = b.dataset.bypassSide ||
+            (parseFloat(b.style.left) < 50 ? 'right' : 'left');
+          positions.push({
+            cx: r.left + r.width / 2,
+            cy: r.top + r.height / 2 + scrollTop,
+            bypassSide: bypassSide
+          });
+        });
+        positions.sort(function(a, b) { return a.cy - b.cy; });
+        return positions;
+      }
+
+      function buildBypassPath() {
+        const viewportW = window.innerWidth;
+        const bubbles = getBubbleAbsolutePositions();
+        const waypoints = [];
+        // Start at the signal location (where the orb spawned)
+        waypoints.push({
+          cx: viewportW * 0.5,
+          cy: orbDownStartTop
+        });
+        // One waypoint per bubble, offset to the bypass side
+        bubbles.forEach(function(b) {
+          const bypassX = b.bypassSide === 'right' ? b.cx + BYPASS_OFFSET : b.cx - BYPASS_OFFSET;
+          const clampedX = Math.max(60, Math.min(viewportW - 60, bypassX));
+          waypoints.push({ cx: clampedX, cy: b.cy });
+        });
+        // Exit waypoint past the last bubble, on the opposite side from its bypass
+        if (bubbles.length > 0) {
+          const last = bubbles[bubbles.length - 1];
+          const exitX = last.bypassSide === 'right' ? viewportW * 0.65 : viewportW * 0.35;
+          waypoints.push({ cx: exitX, cy: last.cy + 600 });
+        }
+        return waypoints;
       }
 
       function updateOrbDownPosition() {
         if (!orbDownTracking) return;
         const c = getCenters();
         const scrollTop = window.scrollY || window.pageYOffset;
-        const docHeight = Math.max(
-          document.body.scrollHeight,
-          document.documentElement.scrollHeight
-        );
-        const targetY = scrollTop + c.viewportHeight * 0.55;
-        const minY = orbDownStartTop;
-        const maxY = docHeight - 80;
-        const clampedY = Math.min(Math.max(targetY, minY), maxY);
+        const targetVisibleY = c.viewportHeight * 0.55;
+        let targetAbsoluteY = scrollTop + targetVisibleY;
 
-        const centerX = c.viewportWidth / 2;
-        const halfWidth = c.viewportWidth / 2;
-        const distanceTraveled = Math.max(0, clampedY - minY);
-        const journeyTotal = Math.max(1, maxY - minY);
-        const progress = Math.min(distanceTraveled / journeyTotal, 1);
+        // Don't let the orb travel above where it spawned (parks at top when scrolled back up)
+        const minY = orbDownStartTop + 200;
+        if (targetAbsoluteY < minY) targetAbsoluteY = minY;
 
-        const wanderX = wanderingPath(progress, halfWidth);
-        const breathWobble = Math.sin(performance.now() / 1500) * 7;
-        const verticalDrift = Math.sin(performance.now() / 1900) * 4;
-        const finalX = centerX + wanderX + breathWobble;
-        const finalY = clampedY + verticalDrift;
+        const waypoints = buildBypassPath();
 
-        orbDown.style.top = (finalY - 15) + 'px';
-        orbDown.style.left = (finalX - 15) + 'px';
+        // Find the segment of the path the orb is currently traversing
+        let prev = waypoints[0];
+        let next = waypoints[waypoints.length - 1];
+        for (let i = 0; i < waypoints.length - 1; i++) {
+          if (targetAbsoluteY >= waypoints[i].cy && targetAbsoluteY <= waypoints[i + 1].cy) {
+            prev = waypoints[i];
+            next = waypoints[i + 1];
+            break;
+          }
+        }
+        if (targetAbsoluteY > waypoints[waypoints.length - 1].cy) {
+          prev = waypoints[waypoints.length - 2] || waypoints[0];
+          next = waypoints[waypoints.length - 1];
+        }
+
+        // Eased interpolation between waypoints — soft turns into and out of each bubble pass
+        const span = next.cy - prev.cy;
+        const t = span > 0 ? Math.max(0, Math.min(1, (targetAbsoluteY - prev.cy) / span)) : 0.5;
+        const easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const baseX = prev.cx + (next.cx - prev.cx) * easedT;
+
+        // Fairy-wandering wobble overlaid on the bypass path
+        const time = performance.now() / 1000;
+        const wobbleX = Math.sin(time * 0.5) * 16 + Math.sin(time * 1.1) * 6;
+        const wobbleY = Math.cos(time * 0.4) * 12 + Math.cos(time * 0.9) * 5;
+
+        let driftX = baseX + wobbleX;
+        let driftY = targetVisibleY + wobbleY;
+
+        driftX = Math.max(40, Math.min(c.viewportWidth - 40, driftX));
+        driftY = Math.max(60, Math.min(c.viewportHeight - 60, driftY));
+
+        const absoluteY = scrollTop + driftY;
+        orbDown.style.top = (absoluteY - 20) + 'px';
+        orbDown.style.left = (driftX - 20) + 'px';
       }
 
       function dissolve() {
@@ -621,6 +799,240 @@
         requestAnimationFrame(tickOrbDown);
       }
       requestAnimationFrame(tickOrbDown);
+    })();
+
+    /* The five glimpses — bubble construction, hover-proximity expand, click-to-toggle */
+    (function() {
+      const bubbleNodes = document.querySelectorAll('.ebubble');
+      if (!bubbleNodes.length) return;
+
+      const data = [
+        {
+          name: 'natural rhythms',
+          title: 'The world keeps a tempo older than anything you have built.',
+          passage: 'The turning of the day. The pulling of the tides. Your body was tuned to these rhythms before you had a name. It still is.',
+          invitation: 'Be outside tonight when the light changes.',
+          shape: 'M 240,28 C 336,30 428,90 432,220 C 440,312 388,406 288,436 C 206,460 110,436 62,364 C 12,284 24,170 88,100 C 134,50 188,28 240,28 Z',
+          grad: { cx: 58, cy: 60 }
+        },
+        {
+          name: 'love and connection',
+          title: 'There is a kind of attention nothing can replicate.',
+          passage: 'Eyes that are only looking at you. The weight of another body in the room. None of it broadcast. None of it filmed.',
+          invitation: 'Take a stronger step toward deeper connection.',
+          shape: 'M 240,30 C 342,34 428,102 432,212 C 436,304 396,398 304,436 C 222,468 120,448 64,376 C 14,308 20,186 74,110 C 120,54 188,30 240,30 Z',
+          grad: { cx: 44, cy: 54 }
+        },
+        {
+          name: 'movement and creativity',
+          title: 'Something only comes alive when you create without performing.',
+          passage: 'The body that moves for joy. The hand that creates for the sake of creation. No need to optimize. Not always for an audience.',
+          invitation: 'Make something this week that no one will see.',
+          shape: 'M 240,24 C 342,28 436,90 436,212 C 432,304 384,402 290,436 C 208,468 102,438 54,360 C 6,278 24,168 90,100 C 138,50 188,24 240,24 Z',
+          grad: { cx: 56, cy: 58 }
+        },
+        {
+          name: 'presence and consciousness',
+          title: 'You are a being the universe created that no measure can recreate.',
+          passage: 'Awareness moving through a body in time. The deepest mystery available to you. No model recombines its way into this.',
+          invitation: 'Sit somewhere quiet today. Breathe in. You are here.',
+          shape: 'M 240,30 C 336,28 432,92 436,210 C 440,308 394,402 298,436 C 212,468 110,448 62,372 C 14,294 22,180 80,108 C 126,54 184,30 240,30 Z',
+          grad: { cx: 50, cy: 50 }
+        },
+        {
+          name: 'sovereignty',
+          title: 'The path is not behind you. It is through.',
+          passage: 'Let the conduit do what it can. Keep the part of you that no conduit can replicate. Stay the one who chooses.',
+          invitation: 'Stay the one who chooses.',
+          shape: 'M 240,28 C 340,24 432,90 432,212 C 440,308 390,406 296,436 C 210,464 102,438 50,362 C 8,288 24,168 88,100 C 134,52 188,28 240,28 Z',
+          grad: { cx: 50, cy: 50 }
+        }
+      ];
+
+      // Build each bubble's SVG content
+      bubbleNodes.forEach(function(b, i) {
+        const num = i + 1;
+        const d = data[i];
+        const auraGradId = 'aura-grad-' + num;
+        const imgGradId = 'img-grad-' + num;
+        const clipId = 'clip-' + num;
+
+        b.innerHTML =
+          '<svg viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet">' +
+            '<defs>' +
+              '<radialGradient id="' + auraGradId + '" cx="50%" cy="50%" r="50%">' +
+                '<stop offset="0%" stop-color="rgb(var(--c))" stop-opacity="1"/>' +
+                '<stop offset="30%" stop-color="rgb(var(--c))" stop-opacity="0.78"/>' +
+                '<stop offset="60%" stop-color="rgb(var(--c))" stop-opacity="0.32"/>' +
+                '<stop offset="100%" stop-color="rgb(var(--c))" stop-opacity="0"/>' +
+              '</radialGradient>' +
+              '<radialGradient id="' + imgGradId + '" cx="' + d.grad.cx + '%" cy="' + d.grad.cy + '%" r="62%">' +
+                '<stop offset="0%" stop-color="rgb(var(--img-warm))" stop-opacity="0.95"/>' +
+                '<stop offset="35%" stop-color="rgb(var(--img-mid))" stop-opacity="0.78"/>' +
+                '<stop offset="70%" stop-color="rgb(var(--img-deep))" stop-opacity="0.92"/>' +
+                '<stop offset="100%" stop-color="rgb(var(--img-deep))" stop-opacity="1"/>' +
+              '</radialGradient>' +
+              '<clipPath id="' + clipId + '"><path d="' + d.shape + '"/></clipPath>' +
+            '</defs>' +
+            '<g class="aura-far">' +
+              '<circle cx="240" cy="240" r="320" fill="url(#' + auraGradId + ')" filter="url(#aura-blur-far)" opacity="0.85"/>' +
+            '</g>' +
+            '<g class="aura-mid">' +
+              '<circle cx="240" cy="240" r="270" fill="url(#' + auraGradId + ')" filter="url(#aura-blur-mid)" opacity="0.92"/>' +
+            '</g>' +
+            '<g class="aura-near">' +
+              '<circle cx="240" cy="240" r="225" fill="url(#' + auraGradId + ')" filter="url(#aura-blur-near)"/>' +
+            '</g>' +
+            '<g clip-path="url(#' + clipId + ')">' +
+              '<rect x="0" y="0" width="480" height="480" fill="url(#' + imgGradId + ')" filter="url(#bub-blur-rest)" class="bubble-image-rest"/>' +
+              '<rect x="0" y="0" width="480" height="480" fill="url(#' + imgGradId + ')" filter="url(#bub-blur-clear)" class="bubble-image-clear" opacity="0"/>' +
+            '</g>' +
+            '<text class="bubble-name-text" x="240" y="424" text-anchor="middle">' + d.name + '</text>' +
+            '<foreignObject class="bubble-content-fo" x="0" y="0" width="480" height="480">' +
+              '<div class="bubble-content-inner" xmlns="http://www.w3.org/1999/xhtml">' +
+                '<p class="bubble-title-line">' + d.title + '</p>' +
+                '<p class="bubble-passage-line">' + d.passage + '</p>' +
+                '<p class="bubble-invitation-line">' + d.invitation + '</p>' +
+              '</div>' +
+            '</foreignObject>' +
+          '</svg>';
+
+        const restImg = b.querySelector('.bubble-image-rest');
+        const clearImg = b.querySelector('.bubble-image-clear');
+        if (restImg) restImg.style.transition = 'opacity 0.7s cubic-bezier(0.22,0.61,0.36,1)';
+        if (clearImg) clearImg.style.transition = 'opacity 0.7s cubic-bezier(0.22,0.61,0.36,1)';
+
+        // Sample the bubble's clip-path to know its rim distance at every angle.
+        // This drives the collapse-on-rim-cross logic — collapse fires when the cursor
+        // crosses the actual visible bubble outline, accounting for the organic shape.
+        const path = b.querySelector('clipPath path');
+        if (path) {
+          const samples = [];
+          const len = path.getTotalLength();
+          for (let s = 0; s < 64; s++) {
+            const pt = path.getPointAtLength((s / 64) * len);
+            const dx = pt.x - 240;
+            const dy = pt.y - 240;
+            samples.push({ angle: Math.atan2(dy, dx), dist: Math.sqrt(dx*dx + dy*dy) });
+          }
+          samples.sort(function(a, b) { return a.angle - b.angle; });
+          b._rimSamples = samples;
+        }
+      });
+
+      function rimDistanceAtAngle(b, angle) {
+        const samples = b._rimSamples;
+        if (!samples) return 215;
+        let lo = samples[samples.length - 1];
+        let hi = samples[0];
+        for (let i = 0; i < samples.length; i++) {
+          if (samples[i].angle > angle) {
+            hi = samples[i];
+            lo = samples[(i - 1 + samples.length) % samples.length];
+            break;
+          }
+        }
+        return (lo.dist + hi.dist) / 2;
+      }
+
+      const REST_RADIUS = 90;
+      const REST_ENTER_PROXIMITY = 90;
+      let activeBubble = null;
+
+      function getBubbleCenter(b) {
+        const r = b.getBoundingClientRect();
+        return { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+      }
+
+      function expand(b) {
+        if (activeBubble && activeBubble !== b) collapse(activeBubble);
+        b.classList.add('expanded');
+        const restImg = b.querySelector('.bubble-image-rest');
+        const clearImg = b.querySelector('.bubble-image-clear');
+        if (restImg) restImg.style.opacity = '0';
+        if (clearImg) clearImg.style.opacity = '1';
+        activeBubble = b;
+      }
+
+      function collapse(b) {
+        b.classList.remove('expanded');
+        const restImg = b.querySelector('.bubble-image-rest');
+        const clearImg = b.querySelector('.bubble-image-clear');
+        if (restImg) restImg.style.opacity = '1';
+        if (clearImg) clearImg.style.opacity = '0';
+        if (activeBubble === b) activeBubble = null;
+      }
+
+      // Cursor proximity — expand on approach, collapse the moment the cursor crosses the rim
+      document.addEventListener('mousemove', function(e) {
+        if (activeBubble) {
+          const c = getBubbleCenter(activeBubble);
+          const dx = e.clientX - c.cx;
+          const dy = e.clientY - c.cy;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const angle = Math.atan2(dy, dx);
+          const rim = rimDistanceAtAngle(activeBubble, angle);
+          if (dist > rim) {
+            // Cursor left the rim — check if it's heading toward another bubble's proximity zone
+            let nextBubble = null;
+            let nextDist = Infinity;
+            bubbleNodes.forEach(function(b) {
+              if (b === activeBubble) return;
+              const cc = getBubbleCenter(b);
+              const ddx = e.clientX - cc.cx;
+              const ddy = e.clientY - cc.cy;
+              const d = Math.sqrt(ddx*ddx + ddy*ddy);
+              const proximityToRest = d - REST_RADIUS;
+              if (proximityToRest < nextDist) { nextBubble = b; nextDist = proximityToRest; }
+            });
+            if (nextBubble && nextDist <= REST_ENTER_PROXIMITY) {
+              collapse(activeBubble);
+              expand(nextBubble);
+            } else {
+              collapse(activeBubble);
+            }
+          }
+          return;
+        }
+        let closest = null;
+        let closestDist = Infinity;
+        bubbleNodes.forEach(function(b) {
+          const c = getBubbleCenter(b);
+          const ddx = e.clientX - c.cx;
+          const ddy = e.clientY - c.cy;
+          const d = Math.sqrt(ddx*ddx + ddy*ddy);
+          const proximityToRest = d - REST_RADIUS;
+          if (proximityToRest < closestDist) { closest = b; closestDist = proximityToRest; }
+        });
+        if (closest && closestDist <= REST_ENTER_PROXIMITY) expand(closest);
+      });
+
+      // Click toggles — primary affordance on touch devices
+      bubbleNodes.forEach(function(b) {
+        b.addEventListener('click', function() {
+          if (b.classList.contains('expanded')) collapse(b);
+          else expand(b);
+        });
+      });
+
+      // Resync the field's full-page height continuously while a bloom transitions,
+      // so the misted green stays beneath everything as the document grows
+      let resyncRaf = null;
+      function startResyncBurst() {
+        const start = performance.now();
+        function tick(now) {
+          if (typeof window.__echoSyncField === 'function') window.__echoSyncField();
+          if (now - start < 900) {
+            resyncRaf = requestAnimationFrame(tick);
+          }
+        }
+        if (resyncRaf) cancelAnimationFrame(resyncRaf);
+        resyncRaf = requestAnimationFrame(tick);
+      }
+      bubbleNodes.forEach(function(b) {
+        b.addEventListener('click', startResyncBurst);
+        b.addEventListener('mouseenter', startResyncBurst);
+      });
     })();
   </script>
 
