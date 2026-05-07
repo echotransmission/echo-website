@@ -40,6 +40,8 @@
       height: 100%;
       pointer-events: none;
       z-index: 0;
+      will-change: transform, opacity;
+      transform: translateZ(0);
       background:
         radial-gradient(ellipse 80% 8%  at 50% 4%,  rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 70% 8%  at 25% 12%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
@@ -53,11 +55,11 @@
         radial-gradient(ellipse 80% 8%  at 35% 76%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 70% 8%  at 70% 84%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 75% 8%  at 30% 92%, rgba(95, 125, 110, 0.07) 0%, transparent 70%);
-      animation: fieldDrift 36s ease-in-out infinite;
+      animation: fieldDrift 60s ease-in-out infinite;
     }
     @keyframes fieldDrift {
-      0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
-      50%      { transform: translate(1.5%, -0.6%) scale(1.02); opacity: 0.88; }
+      0%, 100% { transform: translateZ(0) translate(0, 0); opacity: 1; }
+      50%      { transform: translateZ(0) translate(0.6%, -0.3%); opacity: 0.92; }
     }
 
     /* Opening sequence stage — the first viewport */
@@ -323,6 +325,8 @@
     }
     .orb-up {
       position: fixed;
+      top: 0;
+      left: 0;
       width: 18px;
       height: 18px;
       background: radial-gradient(circle, rgba(220, 245, 250, 1) 0%, rgba(180, 235, 245, 0.7) 35%, rgba(150, 225, 235, 0.3) 65%, transparent 90%);
@@ -330,6 +334,7 @@
       box-shadow: 0 0 24px rgba(180, 235, 245, 0.85), 0 0 48px rgba(180, 235, 245, 0.4);
       z-index: 200;
       will-change: transform, opacity;
+      transform: translate3d(-100px, -100px, 0);
     }
     .orb-down {
       width: 40px;
@@ -695,8 +700,15 @@
       // bubble repositions are handled.
       const BYPASS_OFFSET = 220;
 
+      // Cache for bubble positions — invalidated when scroll/resize happens.
+      // Avoids triggering layout reflow on every animation frame.
+      let cachedBubblePositions = null;
+      let cachedBubblePositionsAtScroll = -1;
       function getBubbleAbsolutePositions() {
         const scrollTop = window.scrollY || window.pageYOffset;
+        if (cachedBubblePositions !== null && Math.abs(cachedBubblePositionsAtScroll - scrollTop) < 5) {
+          return cachedBubblePositions;
+        }
         const bubbles = document.querySelectorAll('.ebubble');
         const positions = [];
         bubbles.forEach(function(b) {
@@ -710,6 +722,8 @@
           });
         });
         positions.sort(function(a, b) { return a.cy - b.cy; });
+        cachedBubblePositions = positions;
+        cachedBubblePositionsAtScroll = scrollTop;
         return positions;
       }
 
@@ -740,15 +754,15 @@
       function updateOrbDownPosition() {
         if (!orbDownTracking) return;
         const c = getCenters();
-        const scrollTop = window.scrollY || window.pageYOffset;
+        const scrollTop = window.scrollY || window.pageYOffset || 0;
         const viewportH = c.viewportHeight;
 
-        // The orb's visible Y position in the viewport. Default: 55% from top.
-        // When scrolled near top, the orb parks at the spawn position (not below it).
+        // The orb sits at 55% of the viewport while scrolling.
+        // When near the top (spawn point still in view), park near where it spawned.
         let driftVisibleY = viewportH * 0.55;
         const spawnVisibleY = orbDownStartTop - scrollTop;
-        // If the spawn point is still in or near the viewport, park near it
-        if (spawnVisibleY > viewportH * 0.30) {
+        if (spawnVisibleY > 0 && spawnVisibleY < viewportH) {
+          // Spawn is visible — park 80px below it, but never above 55% of viewport
           driftVisibleY = Math.max(driftVisibleY, spawnVisibleY + 80);
         }
 
@@ -800,10 +814,10 @@
       // Scroll-position-based dissolve / return.
       // - First scroll past 8px: birth the fairy orbs (one-time).
       // - Scroll past 40% of viewport: signal contracts to dissolved state.
-      // - Scroll back above 40%: signal returns (signalSpawned must already have happened).
+      // - Scroll back above 40%: signal returns.
       let signalSpawned = false;
-      function handleScroll() {
-        const scrollTop = window.scrollY || window.pageYOffset;
+      function pollScrollState() {
+        const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
         const viewportH = window.innerHeight;
         const dissolveThreshold = viewportH * 0.4;
 
@@ -811,7 +825,7 @@
           signalSpawned = true;
           const c = getCenters();
           animateOrbUp();
-          setTimeout(function() { startOrbDown(c); }, 100);
+          startOrbDown(c);
         }
 
         if (scrollTop > dissolveThreshold) {
@@ -827,9 +841,6 @@
             stage.classList.add('returning');
           }
         }
-
-        // Drive the orb-down on every scroll event
-        updateOrbDownPosition();
       }
 
       // Click on the stage — direct dissolve trigger for users who tap
@@ -840,11 +851,12 @@
         const c = getCenters();
         stage.classList.add('dissolving');
         animateOrbUp();
-        setTimeout(function() { startOrbDown(c); }, 100);
+        startOrbDown(c);
       }
 
-      // Scroll-position-based logic: signal contracts above the threshold, returns below
-      window.addEventListener('scroll', handleScroll, { passive: true });
+      // Scroll listener kicks off polling — we still listen for scroll to be responsive,
+      // but the rAF loop is the source of truth and runs continuously.
+      window.addEventListener('scroll', pollScrollState, { passive: true });
 
       // Click anywhere on the stage (except the nav) triggers the fairy orbs immediately
       stage.addEventListener('click', function(e) {
@@ -857,8 +869,11 @@
         e.stopPropagation();
       });
 
-      // The orb's wandering path needs continuous updates so its breath wobble keeps moving
+      // The rAF loop runs every frame: polls scroll state and updates orb-down position.
+      // This is the source of truth — independent of whether scroll events are firing,
+      // and keeps the orb breathing/wobbling continuously.
       function tickOrbDown() {
+        pollScrollState();
         if (orbDownTracking) updateOrbDownPosition();
         requestAnimationFrame(tickOrbDown);
       }
