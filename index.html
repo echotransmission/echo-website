@@ -322,12 +322,14 @@
       opacity: 0;
     }
     .orb-up {
+      position: fixed;
       width: 18px;
       height: 18px;
       background: radial-gradient(circle, rgba(220, 245, 250, 1) 0%, rgba(180, 235, 245, 0.7) 35%, rgba(150, 225, 235, 0.3) 65%, transparent 90%);
       filter: blur(2px);
-      box-shadow: 0 0 24px rgba(180, 235, 245, 0.7);
-      z-index: 50;
+      box-shadow: 0 0 24px rgba(180, 235, 245, 0.85), 0 0 48px rgba(180, 235, 245, 0.4);
+      z-index: 200;
+      will-change: transform, opacity;
     }
     .orb-down {
       width: 40px;
@@ -363,6 +365,19 @@
     }
     @keyframes lineFade {
       to { opacity: 0; filter: blur(4px); }
+    }
+
+    /* The signal returns when the visitor scrolls back up past the dissolve threshold */
+    .returning .signal-wrap { animation: signalReturn 1.2s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
+    .returning .opening-line { animation: lineReturn 0.9s ease-out 0.3s forwards; }
+    .returning .scroll-hint { animation: lineReturn 0.5s ease-out 0.6s forwards; }
+    @keyframes signalReturn {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes lineReturn {
+      0%   { opacity: 0; filter: blur(4px); }
+      100% { opacity: 0.92; filter: blur(0); }
     }
 
     /* The five glimpses — Session B */
@@ -607,29 +622,43 @@
         };
       }
 
-      function animateOrbUp(c) {
-        const startX = c.sigX;
-        const startY = c.sigY;
-        const endX = c.navX;
-        const endY = c.navY;
-        const ctrlX = startX + (endX - startX) * 0.35;
-        const ctrlY = startY - 80;
-        orbUp.style.left = (startX - 9) + 'px';
-        orbUp.style.top = (startY - 9) + 'px';
+      // Viewport-coordinate accessors for the orb-up flight
+      function getSignalViewport() {
+        const r = signalWrap.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }
+      function getNavViewport() {
+        const r = navMark.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }
+
+      function animateOrbUp() {
+        // Capture only the START position (the signal at flight start) — the END
+        // (the nav) is recalculated every frame so the orb tracks the nav even
+        // when scroll is happening during the flight.
+        const sig = getSignalViewport();
+        const startX = sig.x;
+        const startY = sig.y;
+        orbUp.style.transform = 'translate3d(' + (startX - 9) + 'px, ' + (startY - 9) + 'px, 0)';
         orbUp.style.opacity = '0';
-        const duration = 1400;
+        const duration = 1100;
         const startTime = performance.now();
         function frame(now) {
           const t = Math.min((now - startTime) / duration, 1);
-          const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          // Cubic ease-out: fast start, smooth deceleration into the dots
+          const eased = 1 - Math.pow(1 - t, 3);
+          const navNow = getNavViewport();
+          const endX = navNow.x;
+          const endY = navNow.y;
+          const ctrlX = startX + (endX - startX) * 0.4;
+          const ctrlY = Math.min(startY, endY) - 50;
           const omt = 1 - eased;
           const x = omt * omt * startX + 2 * omt * eased * ctrlX + eased * eased * endX;
           const y = omt * omt * startY + 2 * omt * eased * ctrlY + eased * eased * endY;
-          orbUp.style.left = (x - 9) + 'px';
-          orbUp.style.top = (y - 9) + 'px';
+          orbUp.style.transform = 'translate3d(' + (x - 9) + 'px, ' + (y - 9) + 'px, 0)';
           let op;
-          if (t < 0.12) op = t / 0.12;
-          else if (t > 0.88) op = (1 - t) / 0.12;
+          if (t < 0.1) op = t / 0.1;
+          else if (t > 0.92) op = (1 - t) / 0.08;
           else op = 1;
           orbUp.style.opacity = String(op);
           if (t < 1) {
@@ -712,12 +741,18 @@
         if (!orbDownTracking) return;
         const c = getCenters();
         const scrollTop = window.scrollY || window.pageYOffset;
-        const targetVisibleY = c.viewportHeight * 0.55;
-        let targetAbsoluteY = scrollTop + targetVisibleY;
+        const viewportH = c.viewportHeight;
 
-        // Don't let the orb travel above where it spawned (parks at top when scrolled back up)
-        const minY = orbDownStartTop + 200;
-        if (targetAbsoluteY < minY) targetAbsoluteY = minY;
+        // The orb's visible Y position in the viewport. Default: 55% from top.
+        // When scrolled near top, the orb parks at the spawn position (not below it).
+        let driftVisibleY = viewportH * 0.55;
+        const spawnVisibleY = orbDownStartTop - scrollTop;
+        // If the spawn point is still in or near the viewport, park near it
+        if (spawnVisibleY > viewportH * 0.30) {
+          driftVisibleY = Math.max(driftVisibleY, spawnVisibleY + 80);
+        }
+
+        const targetAbsoluteY = scrollTop + driftVisibleY;
 
         const waypoints = buildBypassPath();
 
@@ -735,6 +770,10 @@
           prev = waypoints[waypoints.length - 2] || waypoints[0];
           next = waypoints[waypoints.length - 1];
         }
+        if (targetAbsoluteY < waypoints[0].cy) {
+          prev = waypoints[0];
+          next = waypoints[1] || waypoints[0];
+        }
 
         // Eased interpolation between waypoints — soft turns into and out of each bubble pass
         const span = next.cy - prev.cy;
@@ -748,7 +787,7 @@
         const wobbleY = Math.cos(time * 0.4) * 12 + Math.cos(time * 0.9) * 5;
 
         let driftX = baseX + wobbleX;
-        let driftY = targetVisibleY + wobbleY;
+        let driftY = driftVisibleY + wobbleY;
 
         driftX = Math.max(40, Math.min(c.viewportWidth - 40, driftX));
         driftY = Math.max(60, Math.min(c.viewportHeight - 60, driftY));
@@ -758,34 +797,59 @@
         orbDown.style.left = (driftX - 20) + 'px';
       }
 
-      function dissolve() {
-        if (dissolved) return;
+      // Scroll-position-based dissolve / return.
+      // - First scroll past 8px: birth the fairy orbs (one-time).
+      // - Scroll past 40% of viewport: signal contracts to dissolved state.
+      // - Scroll back above 40%: signal returns (signalSpawned must already have happened).
+      let signalSpawned = false;
+      function handleScroll() {
+        const scrollTop = window.scrollY || window.pageYOffset;
+        const viewportH = window.innerHeight;
+        const dissolveThreshold = viewportH * 0.4;
+
+        if (scrollTop > 8 && !signalSpawned) {
+          signalSpawned = true;
+          const c = getCenters();
+          animateOrbUp();
+          setTimeout(function() { startOrbDown(c); }, 100);
+        }
+
+        if (scrollTop > dissolveThreshold) {
+          if (!dissolved) {
+            dissolved = true;
+            stage.classList.remove('returning');
+            stage.classList.add('dissolving');
+          }
+        } else {
+          if (dissolved) {
+            dissolved = false;
+            stage.classList.remove('dissolving');
+            stage.classList.add('returning');
+          }
+        }
+
+        // Drive the orb-down on every scroll event
+        updateOrbDownPosition();
+      }
+
+      // Click on the stage — direct dissolve trigger for users who tap
+      function dissolveOnClick() {
+        if (signalSpawned) return;
+        signalSpawned = true;
         dissolved = true;
         const c = getCenters();
         stage.classList.add('dissolving');
-        animateOrbUp(c);
-        setTimeout(function() { startOrbDown(c); }, 250);
+        animateOrbUp();
+        setTimeout(function() { startOrbDown(c); }, 100);
       }
 
-      let touchStartY = null;
-      window.addEventListener('wheel', function(e) {
-        if (e.deltaY > 0) dissolve();
-      }, { passive: true });
-      window.addEventListener('touchstart', function(e) {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-      window.addEventListener('touchmove', function(e) {
-        if (touchStartY !== null && touchStartY - e.touches[0].clientY > 8) dissolve();
-      }, { passive: true });
-      window.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.code === 'Space') dissolve();
-      });
-      window.addEventListener('scroll', updateOrbDownPosition, { passive: true });
+      // Scroll-position-based logic: signal contracts above the threshold, returns below
+      window.addEventListener('scroll', handleScroll, { passive: true });
 
-      // Click anywhere on the stage (except the nav) triggers dissolve as well
+      // Click anywhere on the stage (except the nav) triggers the fairy orbs immediately
       stage.addEventListener('click', function(e) {
         if (e.target.closest('.nav-mark')) return;
-        dissolve();
+        dissolveOnClick();
       });
 
       // Nav mark click is a no-op for now — Session C wires up the actual menu panel
@@ -1013,25 +1077,6 @@
           if (b.classList.contains('expanded')) collapse(b);
           else expand(b);
         });
-      });
-
-      // Resync the field's full-page height continuously while a bloom transitions,
-      // so the misted green stays beneath everything as the document grows
-      let resyncRaf = null;
-      function startResyncBurst() {
-        const start = performance.now();
-        function tick(now) {
-          if (typeof window.__echoSyncField === 'function') window.__echoSyncField();
-          if (now - start < 900) {
-            resyncRaf = requestAnimationFrame(tick);
-          }
-        }
-        if (resyncRaf) cancelAnimationFrame(resyncRaf);
-        resyncRaf = requestAnimationFrame(tick);
-      }
-      bubbleNodes.forEach(function(b) {
-        b.addEventListener('click', startResyncBurst);
-        b.addEventListener('mouseenter', startResyncBurst);
       });
     })();
   </script>
