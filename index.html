@@ -454,7 +454,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 18% 16%;
+      padding: 14% 13%;
       font-family: 'Fraunces', Georgia, serif;
       color: rgba(245,236,217,0.92);
       box-sizing: border-box;
@@ -462,27 +462,37 @@
     .bubble-title-line {
       font-weight: 300;
       font-style: italic;
-      font-size: 21px;
-      line-height: 1.4;
+      font-size: 16.5px;
+      line-height: 1.35;
       color: var(--name);
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       letter-spacing: 0.005em;
     }
     .bubble-passage-line {
       font-weight: 300;
-      font-size: 14.5px;
-      line-height: 1.65;
+      font-size: 11.5px;
+      line-height: 1.55;
       color: rgba(245,236,217,0.86);
-      margin: 0 0 18px;
+      margin: 0 0 10px;
+    }
+    .bubble-closing-line {
+      font-weight: 300;
+      font-style: italic;
+      font-size: 12.5px;
+      line-height: 1.4;
+      color: var(--name);
+      margin: 0 0 12px;
+      letter-spacing: 0.005em;
+      opacity: 0.92;
     }
     .bubble-invitation-line {
       font-weight: 300;
       font-style: italic;
-      font-size: 16px;
-      line-height: 1.5;
+      font-size: 13px;
+      line-height: 1.45;
       color: var(--inv);
       margin: 0;
-      padding-top: 14px;
+      padding-top: 10px;
       border-top: 0.5px solid rgba(245,236,217,0.2);
     }
 
@@ -964,23 +974,26 @@
         {
           name: 'natural rhythms',
           title: 'The world keeps a tempo older than anything you have built.',
-          passage: 'The turning of the day. The pulling of the tides. Your body was tuned to these rhythms before you had a name. It still is.',
+          passage: 'The turning of the day. The pulling of the tides. The light that arrives in the late afternoon and stays for eleven minutes before it goes. Your body was tuned to these rhythms before you had a name. It still is. When you step inside them, even briefly, something in you remembers what it is to be in time with the world rather than out of step with it.',
+          closing: 'This is the rhythm. It is one of the things that makes you whole.',
           invitation: 'Be outside tonight when the light changes.',
           shape: 'M 240,28 C 336,30 428,90 432,220 C 440,312 388,406 288,436 C 206,460 110,436 62,364 C 12,284 24,170 88,100 C 134,50 188,28 240,28 Z',
           grad: { cx: 58, cy: 60 }
         },
         {
           name: 'love and connection',
-          title: 'There is a kind of attention nothing can replicate.',
-          passage: 'Eyes that are only looking at you. The weight of another body in the room. None of it broadcast. None of it filmed.',
-          invitation: 'Take a stronger step toward deeper connection.',
+          title: 'There is a kind of attention two people can give each other that nothing else can replicate.',
+          passage: 'Eyes that are only looking at you. The weight of another body in the room. A long conversation that goes nowhere in particular and means everything. None of it broadcast. None of it filmed. Just the unrepeatable thing that happens when two humans choose, for a little while, to be entirely with one another.',
+          closing: 'This is love. It is one of the things that makes you whole.',
+          invitation: 'Take a stronger step toward deeper connection this week — with those you love, or those you could come to love.',
           shape: 'M 240,30 C 342,34 428,102 432,212 C 436,304 396,398 304,436 C 222,468 120,448 64,376 C 14,308 20,186 74,110 C 120,54 188,30 240,30 Z',
           grad: { cx: 44, cy: 54 }
         },
         {
           name: 'movement and creativity',
-          title: 'Something only comes alive when you create without performing.',
-          passage: 'The body that moves for joy. The hand that creates for the sake of creation. No need to optimize. Not always for an audience.',
+          title: 'Something in you only comes alive when you are creating without performing.',
+          passage: 'The body that moves for the joy of moving. The hand that creates for the sake of creation. The voice that sings off-key in a kitchen because the song is the soul. No need to optimize. Not always for an audience. Just the unmediated feeling of being a creature making something with the time it has.',
+          closing: 'This is the making. It is one of the things that makes you whole.',
           invitation: 'Make something this week that no one will see.',
           shape: 'M 240,24 C 342,28 436,90 436,212 C 432,304 384,402 290,436 C 208,468 102,438 54,360 C 6,278 24,168 90,100 C 138,50 188,24 240,24 Z',
           grad: { cx: 56, cy: 58 }
@@ -988,16 +1001,18 @@
         {
           name: 'presence and consciousness',
           title: 'You are a being the universe created that no measure can recreate.',
-          passage: 'Awareness moving through a body in time. The deepest mystery available to you. No model recombines its way into this.',
-          invitation: 'Sit somewhere quiet today. Breathe in. You are here.',
+          passage: 'Awareness moving through a body in time. The ineffable fact of being here at all — knowing you are knowing, sensing you are sensing, born to a living, breathing world. This is the deepest mystery available to you, and you are it. No model recombines its way into this. No system arrives here from the outside. It is the one thing that is only ever lived from within.',
+          closing: 'This is consciousness. It is what makes you whole.',
+          invitation: 'With intention, sit somewhere quiet today. Breathe in and notice fully. You are here.',
           shape: 'M 240,30 C 336,28 432,92 436,210 C 440,308 394,402 298,436 C 212,468 110,448 62,372 C 14,294 22,180 80,108 C 126,54 184,30 240,30 Z',
           grad: { cx: 50, cy: 50 }
         },
         {
           name: 'sovereignty',
           title: 'The path is not behind you. It is through.',
-          passage: 'Let the conduit do what it can. Keep the part of you that no conduit can replicate. Stay the one who chooses.',
-          invitation: 'Stay the one who chooses.',
+          passage: 'The intelligence you are building can be a conduit. A medium. Something that carries what you are doing further than you could carry it alone. Let it do what it is good at. And keep — protect, practice, return to — the part of you that no conduit can replicate. The body. The breath. The presence. The capacity to sit with a hard question long enough to be changed by it. The recognition of what is genuinely new, which only consciousness in living form can sense.',
+          closing: 'This is sovereignty. It is what keeps the rest of you whole.',
+          invitation: 'Let the conduit carry what it can. Stay the one who chooses.',
           shape: 'M 240,28 C 340,24 432,90 432,212 C 440,308 390,406 296,436 C 210,464 102,438 50,362 C 8,288 24,168 88,100 C 134,52 188,28 240,28 Z',
           grad: { cx: 50, cy: 50 }
         }
@@ -1046,6 +1061,7 @@
               '<div class="bubble-content-inner" xmlns="http://www.w3.org/1999/xhtml">' +
                 '<p class="bubble-title-line">' + d.title + '</p>' +
                 '<p class="bubble-passage-line">' + d.passage + '</p>' +
+                '<p class="bubble-closing-line">' + d.closing + '</p>' +
                 '<p class="bubble-invitation-line">' + d.invitation + '</p>' +
               '</div>' +
             '</foreignObject>' +
