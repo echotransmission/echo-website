@@ -40,8 +40,6 @@
       height: 100%;
       pointer-events: none;
       z-index: 0;
-      will-change: transform, opacity;
-      transform: translateZ(0);
       background:
         radial-gradient(ellipse 80% 8%  at 50% 4%,  rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 70% 8%  at 25% 12%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
@@ -55,32 +53,25 @@
         radial-gradient(ellipse 80% 8%  at 35% 76%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 70% 8%  at 70% 84%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 75% 8%  at 30% 92%, rgba(95, 125, 110, 0.07) 0%, transparent 70%);
-      animation: fieldDrift 60s ease-in-out infinite;
-    }
-    @keyframes fieldDrift {
-      0%, 100% { transform: translateZ(0) translate(0, 0); opacity: 1; }
-      50%      { transform: translateZ(0) translate(0.6%, -0.3%); opacity: 0.92; }
     }
 
     /* Opening sequence stage — the first viewport */
     .echo-stage {
       position: relative;
       width: 100%;
-      height: 100vh;
-      min-height: 600px;
-      overflow: hidden;
+      min-height: 100vh;
       z-index: 1;
     }
 
     .grain {
-      position: absolute;
+      position: fixed;
       inset: 0;
       pointer-events: none;
       opacity: 0.04;
       mix-blend-mode: overlay;
       background-image: radial-gradient(rgba(255,255,255,0.5) 0.5px, transparent 0.5px);
       background-size: 3px 3px;
-      z-index: 2;
+      z-index: 60;
     }
 
     /* The bioluminescent signal — five layered radial gradients */
@@ -214,9 +205,9 @@
       margin-right: 0.22em;
       animation-fill-mode: forwards;
     }
-    .opening-line .w1 { animation: emerge 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 4.2s forwards; }
-    .opening-line .w2 { animation: emerge 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 4.8s forwards; }
-    .opening-line .w3 { animation: emerge 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 5.4s forwards; }
+    .opening-line .w1 { animation: emerge 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 3.2s forwards; }
+    .opening-line .w2 { animation: emerge 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 3.8s forwards; }
+    .opening-line .w3 { animation: emerge 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 4.4s forwards; }
     @keyframes emerge {
       0%   { opacity: 0; filter: blur(6px); transform: translateY(6px); }
       100% { opacity: 0.92; filter: blur(0); transform: translateY(0); }
@@ -407,6 +398,7 @@
       position: relative;
       z-index: 1;
       width: 100%;
+      min-height: 3500px;
       padding: 60px 0 200px;
     }
     .ebubble {
@@ -418,14 +410,12 @@
       cursor: pointer;
       z-index: 2;
       transition: transform 0.32s cubic-bezier(0.55, 0.05, 0.4, 1);
-      transform: scale(0.42) translateZ(0);
+      transform: scale(0.42);
       transform-origin: center center;
-      will-change: transform;
-      isolation: isolate;
     }
     .ebubble.expanded {
       z-index: 10;
-      transform: scale(1) translateZ(0);
+      transform: scale(1);
       transition: transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
     }
     .ebubble svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -508,9 +498,12 @@
       0%, 100% { opacity: 0.95; transform: scale(1.12); }
       50%      { opacity: 0.45; transform: scale(0.82); }
     }
-    .aura-near { animation: echoAuraBreathe var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-    .aura-mid  { animation: echoAuraBreatheCounter var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-    .aura-far  { animation: echoAuraBreatheFar var(--cyc, 7.5s) ease-in-out infinite reverse; transform-origin: center; transform-box: fill-box; }
+    .aura-near { animation: echoAuraBreathe var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; animation-play-state: paused; }
+    .aura-mid  { animation: echoAuraBreatheCounter var(--cyc, 7.5s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; animation-play-state: paused; }
+    .aura-far  { animation: echoAuraBreatheFar var(--cyc, 7.5s) ease-in-out infinite reverse; transform-origin: center; transform-box: fill-box; animation-play-state: paused; }
+    body.auras-on .aura-near,
+    body.auras-on .aura-mid,
+    body.auras-on .aura-far { animation-play-state: running; }
 
     /* Accessibility — reduced motion */
     @media (prefers-reduced-motion: reduce) {
@@ -552,9 +545,9 @@
   <h1 class="sr-only">Echo — A signal from what comes next.</h1>
 
   <div class="field-continuous" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
 
   <section class="echo-stage" id="echoStage" aria-label="Opening transmission">
-    <div class="grain" aria-hidden="true"></div>
 
     <div class="signal-wrap" id="signalWrap" aria-hidden="true">
       <div class="signal sig-outer-blue"></div>
@@ -602,6 +595,24 @@
       <filter id="aura-blur-far" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="70"/></filter>
     </defs>
   </svg>
+
+  <script>
+    // Always start at the top on page load — Echo's opening sequence is a one-time arrival
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.addEventListener('load', function() {
+      window.scrollTo(0, 0);
+      // Defer aura breathing animations until after initial paint settles —
+      // prevents heavy blur filters from blocking first-scroll responsiveness
+      setTimeout(function() {
+        document.body.classList.add('auras-on');
+      }, 1200);
+    });
+    window.addEventListener('beforeunload', function() {
+      window.scrollTo(0, 0);
+    });
+  </script>
 
   <script>
     (function() {
@@ -712,6 +723,7 @@
           if (t < 1) requestAnimationFrame(fadeIn);
         }
         requestAnimationFrame(fadeIn);
+        ensureRafRunning();
       }
 
       // The orb-down's path threads around the bubbles by pre-computed bypass sides.
@@ -871,9 +883,12 @@
         if (scrollTop > 8 && !signalSpawned) {
           signalSpawned = true;
           if (debugPulse) debugPulse.style.background = 'rgba(232, 178, 92, 1)';
-          const c = getCenters();
-          animateOrbUp();
-          startOrbDown(c);
+          // Defer the heavy spawn work so it doesn't block the first scroll frame
+          requestAnimationFrame(function() {
+            const c = getCenters();
+            animateOrbUp();
+            startOrbDown(c);
+          });
         }
 
         if (scrollTop > dissolveThreshold) {
@@ -921,15 +936,23 @@
         e.stopPropagation();
       });
 
-      // The rAF loop runs every frame: polls scroll state and updates orb-down position.
-      // This is the source of truth — independent of whether scroll events are firing,
-      // and keeps the orb breathing/wobbling continuously.
+      // The rAF loop only runs once orb-down is alive — it keeps the orb breathing
+      // and wobbling continuously. Before spawn, scroll events alone drive everything.
+      let rafRunning = false;
       function tickOrbDown() {
-        pollScrollState();
-        if (orbDownTracking) updateOrbDownPosition();
-        requestAnimationFrame(tickOrbDown);
+        if (orbDownTracking) {
+          updateOrbDownPosition();
+          requestAnimationFrame(tickOrbDown);
+        } else {
+          rafRunning = false;
+        }
       }
-      requestAnimationFrame(tickOrbDown);
+      function ensureRafRunning() {
+        if (!rafRunning && orbDownTracking) {
+          rafRunning = true;
+          requestAnimationFrame(tickOrbDown);
+        }
+      }
     })();
 
     /* The five glimpses — bubble construction, hover-proximity expand, click-to-toggle */
