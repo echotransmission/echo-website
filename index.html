@@ -31,7 +31,12 @@
       min-height: 100vh;
     }
 
-    /* The field — one continuous atmosphere across the entire page */
+    /* The field — dual-layer atmosphere for the misted-gradient warming.
+       The cool layer (cooler misted forest green) holds full opacity throughout.
+       The warm layer (subtly warmer green, ~10 RGB units) eases in across the
+       page, warming the field by the time the visitor reaches the seventh,
+       and easing slightly back through Subscribe and footer.
+       The warming is imperceptible — the body registers it before the mind names it. */
     .field-continuous {
       position: absolute;
       top: 0;
@@ -53,6 +58,46 @@
         radial-gradient(ellipse 80% 8%  at 35% 76%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 70% 8%  at 70% 84%, rgba(95, 125, 110, 0.07) 0%, transparent 70%),
         radial-gradient(ellipse 75% 8%  at 30% 92%, rgba(95, 125, 110, 0.07) 0%, transparent 70%);
+    }
+    /* Warm-field overlay — same gradient pattern in slightly warmer tone.
+       The body element gets an inline --warm-field-opacity that is updated by
+       JS as the visitor scrolls. Default is 0 (cool). */
+    .field-warm {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.4s linear;
+      background:
+        radial-gradient(ellipse 80% 8%  at 50% 4%,  rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 8%  at 25% 12%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 75% 8%  at 70% 20%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 8%  at 30% 28%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 8%  at 65% 36%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 75% 8%  at 35% 44%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 8%  at 70% 52%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 8%  at 30% 60%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 75% 8%  at 65% 68%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 8%  at 35% 76%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 8%  at 70% 84%, rgba(120, 130, 100, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 75% 8%  at 30% 92%, rgba(120, 130, 100, 0.08) 0%, transparent 70%);
+    }
+    /* Backstop body warming — a subtle solid-color shift that does the heavy
+       lifting on the imperceptible warming. RGB ~8-12 units warmer at full. */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: rgba(38, 42, 30, 0.6);
+      opacity: var(--warm-field-opacity, 0);
+      transition: opacity 0.4s linear;
+      mix-blend-mode: soft-light;
     }
 
     /* Opening sequence stage — the first viewport */
@@ -228,7 +273,7 @@
       opacity: 0;
       z-index: 5;
       pointer-events: none;
-      animation: hintArrive 2s ease-out 8.2s forwards, hintBreathe 4s ease-in-out 11s infinite;
+      animation: hintArrive 2s ease-out 5.8s forwards, hintBreathe 4s ease-in-out 8.6s infinite;
     }
     @keyframes hintArrive { to { opacity: 1; } }
     @keyframes hintBreathe {
@@ -307,6 +352,122 @@
       50%      { opacity: 0.7; }
     }
 
+    /* The navigation panel — cursor-proximity expansion with staggered cascade.
+       Hovering the nav-mark (or approaching within ~60-80px) reveals the panel.
+       Each item appears with 80-120ms stagger. Items have subtle amber warming
+       on hover with ~1.05 scale. The panel is generous in its welcome —
+       Echo welcomes those who reach. */
+    .nav-panel {
+      position: fixed;
+      top: 76px;
+      right: 36px;
+      z-index: 99;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .nav-panel.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .nav-item {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.75);
+      background: transparent;
+      border: none;
+      padding: 4px 2px;
+      cursor: pointer;
+      text-decoration: none;
+      opacity: 0;
+      transform: translateX(8px);
+      transition:
+        opacity 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+        color 0.4s ease-out,
+        text-shadow 0.4s ease-out;
+      will-change: opacity, transform;
+    }
+    .nav-panel.open .nav-item {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    /* Staggered cascade — 100ms between items */
+    .nav-panel.open .nav-item:nth-child(1) { transition-delay: 0ms; }
+    .nav-panel.open .nav-item:nth-child(2) { transition-delay: 100ms; }
+    .nav-panel.open .nav-item:nth-child(3) { transition-delay: 200ms; }
+    .nav-panel.open .nav-item:nth-child(4) { transition-delay: 300ms; }
+    /* Reverse stagger on close — items go in roughly together */
+    .nav-panel:not(.open) .nav-item { transition-delay: 0ms; }
+    .nav-item:hover,
+    .nav-item:focus-visible {
+      color: #f6dcaa;
+      text-shadow: 0 0 14px rgba(246, 220, 170, 0.35);
+      transform: translateX(0) scale(1.05);
+      outline: none;
+    }
+    .nav-panel.open .nav-item:hover,
+    .nav-panel.open .nav-item:focus-visible {
+      transform: translateX(0) scale(1.05);
+    }
+
+    /* The Sol thread — quiet line of text inviting the visitor to meet Sol.
+       Used at top of first viewport AND in the footer. Same low-opacity register
+       as the scroll hint, breathing offset half a cycle. Hover slightly grows the
+       text and warms its color, signaling clickability without being loud. */
+    .sol-thread {
+      position: absolute;
+      right: 56px;
+      bottom: 40px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 0.4em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.55);
+      background: transparent;
+      border: none;
+      padding: 4px 6px;
+      cursor: pointer;
+      opacity: 0;
+      z-index: 5;
+      animation: hintArrive 2s ease-out 5.8s forwards, threadBreathe 4s ease-in-out 10.6s infinite;
+      transition: color 0.4s ease-out, text-shadow 0.4s ease-out, transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), letter-spacing 0.4s ease-out;
+      transform-origin: center center;
+      display: inline-block;
+    }
+    /* Half-cycle offset from scroll hint — they breathe out of phase */
+    @keyframes threadBreathe {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 0.95; }
+    }
+    .sol-thread:hover,
+    .sol-thread:focus-visible {
+      color: rgba(246, 220, 170, 0.95);
+      text-shadow: 0 0 14px rgba(246, 220, 170, 0.4);
+      transform: scale(1.08);
+      letter-spacing: 0.42em;
+      outline: none;
+    }
+    /* The footer Sol thread — same character, but sits inline in the footer
+       layout rather than absolutely-positioned at the bottom of a viewport.
+       No fade-in animation needed; it's revealed by scroll. */
+    .sol-thread-footer {
+      position: relative;
+      right: auto;
+      bottom: auto;
+      opacity: 1;
+      animation: threadBreathe 4s ease-in-out infinite;
+      margin: 0 0 22px;
+    }
+
     /* The two orbs */
     .orb {
       position: absolute;
@@ -327,23 +488,6 @@
       will-change: transform, opacity;
       transform: translate3d(-100px, -100px, 0);
     }
-
-    /* Debug indicator — small flash at top-left when scroll is being polled.
-       Confirms the rAF loop is running. Remove when no longer needed. */
-    .echo-debug-pulse {
-      position: fixed;
-      top: 8px;
-      left: 8px;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: rgba(180, 235, 245, 0.5);
-      z-index: 999;
-      pointer-events: none;
-      transition: opacity 0.15s linear;
-      opacity: 0;
-    }
-    .echo-debug-pulse.on { opacity: 1; }
     .orb-down {
       width: 40px;
       height: 40px;
@@ -354,6 +498,50 @@
     }
     .orb-down.alive {
       animation: orbPulse 2.6s ease-in-out infinite;
+    }
+    /* When the orb-down has settled at the seventh — it grows visibly,
+       glow becomes brighter, breathing slows. Seamless transition back to
+       wandering size when the visitor scrolls up past the seventh. */
+    .orb-down.settled {
+      animation: orbPulseSettled 3.6s ease-in-out infinite;
+    }
+    @keyframes orbPulseSettled {
+      0%, 100% {
+        transform: scale(1.6);
+        box-shadow: 0 0 70px rgba(200, 245, 252, 1), 0 0 130px rgba(180, 235, 245, 0.55);
+        filter: blur(2.5px);
+      }
+      50% {
+        transform: scale(1.85);
+        box-shadow: 0 0 100px rgba(220, 250, 255, 1), 0 0 170px rgba(200, 245, 252, 0.7);
+        filter: blur(2px);
+      }
+    }
+    /* When the orb-down has arrived at Subscribe — slightly smaller settled
+       state, since the form area is more intimate than the seventh's threshold.
+       Recognition pulse fires when the visitor submits the form. */
+    .orb-down.subscribed {
+      animation: orbPulseSubscribed 3.4s ease-in-out infinite;
+    }
+    @keyframes orbPulseSubscribed {
+      0%, 100% {
+        transform: scale(1.25);
+        box-shadow: 0 0 50px rgba(200, 245, 252, 0.85), 0 0 90px rgba(180, 235, 245, 0.4);
+        filter: blur(2.5px);
+      }
+      50% {
+        transform: scale(1.4);
+        box-shadow: 0 0 70px rgba(220, 250, 255, 0.95), 0 0 120px rgba(200, 245, 252, 0.55);
+        filter: blur(2px);
+      }
+    }
+    .orb-down.recognition {
+      animation: orbRecognition 1.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    @keyframes orbRecognition {
+      0%   { transform: scale(1.25); box-shadow: 0 0 50px rgba(200, 245, 252, 0.85); }
+      30%  { transform: scale(2.1); box-shadow: 0 0 100px rgba(220, 250, 255, 1); }
+      100% { transform: scale(1.25); box-shadow: 0 0 50px rgba(200, 245, 252, 0.85); }
     }
     @keyframes orbPulse {
       0%, 100% {
@@ -393,13 +581,16 @@
       100% { opacity: 0.92; filter: blur(0); }
     }
 
-    /* The five glimpses — Session B */
+    /* The six glimpses — Session C
+       Order: rhythms (G1), love (G2), creativity (G3), presence (G4),
+       vitality (G5, NEW), sovereignty (G6, was G5).
+       Container height expanded to accommodate the new bubble at top:3000px. */
     .glimpses {
       position: relative;
       z-index: 1;
       width: 100%;
-      min-height: 3500px;
-      padding: 60px 0 200px;
+      min-height: 3360px;
+      padding: 60px 0 80px;
     }
     .ebubble {
       position: absolute;
@@ -420,11 +611,19 @@
     }
     .ebubble svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-    .ebubble[data-glimpse="1"] { --c: 232,178,92;  --img-warm: 252,205,118; --img-mid: 196,138,62; --img-deep: 72,46,22;  --name: rgba(252,225,182,0.92); --inv: #f6dcaa; --cyc: 7.5s; }
-    .ebubble[data-glimpse="2"] { --c: 196,90,80;   --img-warm: 220,128,98;  --img-mid: 160,72,62; --img-deep: 60,24,22;  --name: rgba(244,200,178,0.92); --inv: #efc9b6; --cyc: 8.4s; }
-    .ebubble[data-glimpse="3"] { --c: 232,138,62;  --img-warm: 248,170,98;  --img-mid: 220,128,58; --img-deep: 64,30,14; --name: rgba(252,222,180,0.92); --inv: #f8cda0; --cyc: 6.8s; }
-    .ebubble[data-glimpse="4"] { --c: 210,224,236; --img-warm: 232,242,250; --img-mid: 160,185,200; --img-deep: 38,50,60; --name: rgba(238,246,252,0.94); --inv: #f0f4f8; --cyc: 9.2s; }
-    .ebubble[data-glimpse="5"] { --c: 130,186,214; --img-warm: 150,205,228; --img-mid: 110,170,200; --img-deep: 18,38,50; --name: rgba(204,230,244,0.94); --inv: #c8e2ee; --cyc: 7.9s; }
+    /* Field temperatures, in the new order:
+       1 natural rhythms — late-afternoon gold
+       2 love and connection — deep human reds and warm browns
+       3 movement and creativity — motion-warm oranges
+       4 presence and consciousness — silver-white
+       5 vitality and the body — terra warmth (NEW — Session C)
+       6 sovereignty and AI collaboration — steel-cyan */
+    .ebubble[data-glimpse="1"] { --c: 232,178,92;  --img-warm: 252,205,118; --img-mid: 196,138,62;  --img-deep: 72,46,22;  --name: rgba(252,225,182,0.92); --inv: #f6dcaa; --cyc: 7.5s; }
+    .ebubble[data-glimpse="2"] { --c: 196,90,80;   --img-warm: 220,128,98;  --img-mid: 160,72,62;  --img-deep: 60,24,22;  --name: rgba(244,200,178,0.92); --inv: #efc9b6; --cyc: 8.4s; }
+    .ebubble[data-glimpse="3"] { --c: 232,138,62;  --img-warm: 248,170,98;  --img-mid: 220,128,58; --img-deep: 64,30,14;  --name: rgba(252,222,180,0.92); --inv: #f8cda0; --cyc: 6.8s; }
+    .ebubble[data-glimpse="4"] { --c: 210,224,236; --img-warm: 232,242,250; --img-mid: 160,185,200; --img-deep: 38,50,60;  --name: rgba(238,246,252,0.94); --inv: #f0f4f8; --cyc: 9.2s; }
+    .ebubble[data-glimpse="5"] { --c: 196,142,86;  --img-warm: 220,168,108; --img-mid: 168,108,68; --img-deep: 56,32,18;  --name: rgba(244,212,178,0.94); --inv: #ecc9a4; --cyc: 8.0s; }
+    .ebubble[data-glimpse="6"] { --c: 130,186,214; --img-warm: 150,205,228; --img-mid: 110,170,200; --img-deep: 18,38,50;  --name: rgba(204,230,244,0.94); --inv: #c8e2ee; --cyc: 7.9s; }
 
     .bubble-name-text {
       font-family: 'Fraunces', Georgia, serif;
@@ -465,35 +664,51 @@
       font-size: 16.5px;
       line-height: 1.35;
       color: var(--name);
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       letter-spacing: 0.005em;
     }
     .bubble-passage-line {
       font-weight: 300;
       font-size: 11.5px;
-      line-height: 1.55;
+      line-height: 1.5;
       color: rgba(245,236,217,0.86);
-      margin: 0 0 10px;
+      margin: 0 0 8px;
     }
     .bubble-closing-line {
       font-weight: 300;
       font-style: italic;
       font-size: 12.5px;
-      line-height: 1.4;
+      line-height: 1.35;
       color: var(--name);
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       letter-spacing: 0.005em;
       opacity: 0.92;
     }
-    .bubble-invitation-line {
-      font-weight: 300;
+    /* Label above the invitation — the call-to-act header.
+       Brighter and a touch larger than the body it introduces, since on dark
+       bubble backgrounds small low-opacity text gets lost. */
+    .bubble-invitation-label {
+      font-weight: 400;
       font-style: italic;
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 11px;
+      line-height: 1;
+      color: rgba(252, 244, 226, 0.85);
+      margin: 0;
+      padding-top: 8px;
+      padding-bottom: 6px;
+      letter-spacing: 0.32em;
+      text-transform: lowercase;
+      border-top: 0.5px solid rgba(245,236,217,0.25);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    }
+    .bubble-invitation-line {
+      font-weight: 400;
+      font-style: italic;
+      font-size: 14px;
+      line-height: 1.4;
       color: var(--inv);
       margin: 0;
-      padding-top: 10px;
-      border-top: 0.5px solid rgba(245,236,217,0.2);
+      text-shadow: 0 0 12px rgba(0, 0, 0, 0.35);
     }
 
     @keyframes echoAuraBreathe {
@@ -515,6 +730,182 @@
     body.auras-on .aura-mid,
     body.auras-on .aura-far { animation-play-state: running; }
 
+    /* The Seventh — integration element.
+       Centered, ~700px expanded vs. 480 for the glimpses.
+       Sits architecturally outside the field of six. The orb-down rests near it.
+       Click → /vision. */
+    .seventh-section {
+      position: relative;
+      width: 100%;
+      min-height: 80vh;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 20px 80px;
+    }
+    .seventh {
+      position: relative;
+      width: 480px;
+      height: 480px;
+      cursor: pointer;
+      transition: transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+      transform: scale(0.78);
+      transform-origin: center center;
+      /* Cool steel-cyan with terra warmth in the heart — integration colors.
+         The aura uses a rainbow construction (see SVG build below) that combines
+         all six glimpse colors. */
+      --c: 142,176,196;
+      --img-warm: 220,196,158;
+      --img-mid: 130,156,176;
+      --img-deep: 22,42,52;
+      --name: rgba(220,232,242,0.96);
+      --inv: #d4c4a0;
+      --cyc: 11s;
+    }
+    .seventh.expanded {
+      transform: scale(1.55);
+    }
+    .seventh svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .seventh .bubble-name-text { font-size: 26px; }
+    .seventh .bubble-title-line { font-size: 17.5px; margin-bottom: 14px; }
+    .seventh .bubble-passage-line { font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+    .seventh .bubble-closing-line { font-size: 13.5px; margin-bottom: 14px; }
+    .seventh .bubble-invitation-label { font-size: 12px; padding-top: 10px; padding-bottom: 7px; }
+    .seventh .bubble-invitation-line { font-size: 15px; }
+    .seventh .bubble-content-inner { padding: 13% 12%; }
+
+    /* The Subscribe section — the signal continues.
+       Sits after the seventh, before the footer.
+       Custom form posting to Kit's API (NOT Kit's embed).
+       The second fairy lives near the form. */
+    .subscribe-section {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 120px 24px 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .subscribe-heading {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(22px, 2.4vw, 30px);
+      color: rgba(246, 220, 170, 0.92);
+      letter-spacing: 0.01em;
+      margin: 0 0 18px;
+      max-width: 680px;
+    }
+    .subscribe-subhead {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: clamp(14px, 1.3vw, 16px);
+      color: rgba(245, 236, 217, 0.7);
+      line-height: 1.65;
+      margin: 0 0 56px;
+      max-width: 540px;
+    }
+    .subscribe-form {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+      max-width: 460px;
+    }
+    /* Faint cyan glow behind the form — same living presence as the orb */
+    .subscribe-form::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(150, 225, 235, 0.12) 0%, rgba(150, 225, 235, 0.04) 50%, transparent 80%);
+      pointer-events: none;
+      filter: blur(20px);
+      z-index: -1;
+    }
+    .subscribe-input {
+      width: 100%;
+      max-width: 380px;
+      padding: 12px 4px;
+      background: transparent;
+      border: none;
+      border-bottom: 0.5px solid rgba(245, 236, 217, 0.4);
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 16px;
+      color: #f5ecd9;
+      text-align: center;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.5s ease-out;
+    }
+    .subscribe-input::placeholder {
+      color: rgba(245, 236, 217, 0.36);
+      font-style: italic;
+    }
+    .subscribe-input:focus {
+      border-bottom-color: rgba(180, 235, 245, 0.7);
+    }
+    .subscribe-button {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.32em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.78);
+      background: transparent;
+      border: none;
+      padding: 6px 4px;
+      cursor: pointer;
+      transition: color 0.5s ease-out, text-shadow 0.5s ease-out;
+    }
+    .subscribe-button:hover,
+    .subscribe-button:focus-visible {
+      color: #f6dcaa;
+      text-shadow: 0 0 14px rgba(246, 220, 170, 0.4);
+      outline: none;
+    }
+    .subscribe-message {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(180, 235, 245, 0.85);
+      margin: 24px 0 0;
+      min-height: 22px;
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+    .subscribe-message.visible { opacity: 1; }
+
+    /* Footer — quiet, but visible. Houses the bottom Sol thread + contact email. */
+    .echo-footer {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 60px 24px 80px;
+      text-align: center;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .echo-footer p { margin: 0; }
+
     /* Accessibility — reduced motion */
     @media (prefers-reduced-motion: reduce) {
       .signal {
@@ -529,11 +920,16 @@
         transform: none !important;
       }
       .scroll-hint { animation: none !important; opacity: 0.7 !important; }
+      .sol-thread { animation: none !important; opacity: 0.55 !important; }
       .field-continuous { animation: none !important; }
+      .field-warm { transition: none !important; }
       .nav-mark .nav-dot { animation: none !important; }
+      .nav-panel .nav-item { transition: opacity 0.2s linear !important; transform: none !important; }
       .orb-down.alive { animation: none !important; }
+      .orb-down.settled { animation: none !important; transform: scale(1.6) !important; }
+      .orb-down.subscribed { animation: none !important; transform: scale(1.25) !important; }
       .aura-near, .aura-mid, .aura-far { animation: none !important; }
-      .ebubble { transition: none !important; }
+      .ebubble, .seventh { transition: none !important; }
     }
 
     /* Screen reader only */
@@ -555,6 +951,7 @@
   <h1 class="sr-only">Echo — A signal from what comes next.</h1>
 
   <div class="field-continuous" aria-hidden="true"></div>
+  <div class="field-warm" id="fieldWarm" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
 
   <section class="echo-stage" id="echoStage" aria-label="Opening transmission">
@@ -574,26 +971,68 @@
     </p>
 
     <p class="scroll-hint" id="scrollHint" aria-hidden="true">scroll</p>
+
+    <button class="sol-thread" id="solThread" aria-label="Meet the guide">meet the guide</button>
   </section>
 
-  <button class="nav-mark" id="navMark" aria-label="Open navigation">
+  <button class="nav-mark" id="navMark" aria-label="Open navigation" aria-expanded="false">
     <span class="nav-dot nav-dot-1" aria-hidden="true"></span>
     <span class="nav-dot nav-dot-2" aria-hidden="true"></span>
     <span class="nav-dot nav-dot-3" aria-hidden="true"></span>
   </button>
 
+  <nav class="nav-panel" id="navPanel" aria-label="Site navigation">
+    <a class="nav-item" href="/vision">vision</a>
+    <a class="nav-item" href="/coaching">coaching</a>
+    <button class="nav-item" type="button" data-nav-target="subscribe">subscribe</button>
+    <button class="nav-item" type="button" data-nav-target="contact">contact</button>
+  </nav>
+
   <div class="orb orb-up" id="orbUp" aria-hidden="true"></div>
   <div class="orb orb-down" id="orbDown" aria-hidden="true"></div>
-  <div class="echo-debug-pulse" id="echoDebugPulse" aria-hidden="true"></div>
 
-  <!-- The five glimpses — Session B -->
-  <section class="glimpses" aria-label="The five glimpses">
+  <!-- The six glimpses — Session C
+       Order: rhythms (G1), love (G2), creativity (G3), presence (G4),
+       vitality (G5, NEW), sovereignty (G6, was G5).
+       Bypass sides preserved; new G5 added at bypass-right between G4 and G6. -->
+  <section class="glimpses" aria-label="The six glimpses">
     <div class="ebubble" data-glimpse="1" data-bypass-side="right" style="left:30%;top:300px;"></div>
     <div class="ebubble" data-glimpse="2" data-bypass-side="left"  style="left:70%;top:840px;"></div>
     <div class="ebubble" data-glimpse="3" data-bypass-side="right" style="left:50%;top:1380px;"></div>
     <div class="ebubble" data-glimpse="4" data-bypass-side="right" style="left:32%;top:1920px;"></div>
     <div class="ebubble" data-glimpse="5" data-bypass-side="left"  style="left:68%;top:2460px;"></div>
+    <div class="ebubble" data-glimpse="6" data-bypass-side="right" style="left:34%;top:3000px;"></div>
   </section>
+
+  <!-- The Seventh — integration element. Architecturally distinct from the six.
+       Centered, viewport-height, ~700px expanded. Click → /vision. -->
+  <section class="seventh-section" id="seventhSection" aria-label="The seventh — integration">
+    <div class="seventh" id="seventh" data-glimpse="7" role="button" tabindex="0" aria-label="Enter the world that is possible"></div>
+  </section>
+
+  <!-- The signal continues — Subscribe -->
+  <section class="subscribe-section" id="subscribeSection" aria-labelledby="subscribeHeading">
+    <h2 class="subscribe-heading" id="subscribeHeading">the signal continues</h2>
+    <p class="subscribe-subhead">Seven transmissions arrive after this one. They go where the homepage cannot.</p>
+    <form class="subscribe-form" id="subscribeForm" novalidate>
+      <input
+        type="email"
+        class="subscribe-input"
+        id="subscribeEmail"
+        name="email_address"
+        placeholder="your email"
+        required
+        autocomplete="email"
+        aria-label="Email address">
+      <button type="submit" class="subscribe-button">receive the signal</button>
+    </form>
+    <p class="subscribe-message" id="subscribeMessage" role="status" aria-live="polite"></p>
+  </section>
+
+  <footer class="echo-footer" id="contactSection">
+    <button class="sol-thread sol-thread-footer" id="solThreadFooter" aria-label="Meet the guide">meet the guide</button>
+    <p>echo · echo@echotransmission.com</p>
+  </footer>
 
   <!-- SVG filter definitions for the glimpse bubbles -->
   <svg width="0" height="0" style="position:absolute;" aria-hidden="true">
@@ -784,13 +1223,77 @@
           const clampedX = Math.max(60, Math.min(viewportW - 60, bypassX));
           waypoints.push({ cx: clampedX, cy: b.cy });
         });
-        // Exit waypoint past the last bubble, on the opposite side from its bypass
-        if (bubbles.length > 0) {
+        // Now: the seventh-as-waypoint and the journey to Subscribe.
+        // - seventh-rest: above the seventh (this is the first rest stop)
+        // - seventh-side: curving out to the right of the seventh's expanded radius
+        // - subscribe-rest: beside the Subscribe form (the second/final rest stop)
+        const seventhEl = document.getElementById('seventh');
+        const subscribeEl = document.getElementById('subscribeSection');
+        if (seventhEl) {
+          const sr = seventhEl.getBoundingClientRect();
+          const scrollTop = getTrueScrollTop();
+          const seventhCenterX = sr.left + sr.width / 2;
+          const seventhCenterY = sr.top + scrollTop + sr.height / 2;
+          // Rest 1: 280px above the seventh's top edge. The seventh expands to
+          // scale 1.55 (top edge moves up ~184px); 280 - 184 = 96px clearance.
+          const seventhRestY = sr.top + scrollTop - 280;
+          waypoints.push({
+            cx: seventhCenterX,
+            cy: seventhRestY,
+            isRest: true,
+            restType: 'seventh'
+          });
+          // Curve right around the seventh's expanded radius (~400px from center).
+          // Two waypoints to make the curve feel deliberate, not an overshoot:
+          //   - east waypoint at the seventh's vertical midpoint, far right
+          //   - clearance waypoint past the seventh's bottom, gentler X
+          const eastX = Math.min(viewportW - 60, seventhCenterX + 460);
+          waypoints.push({
+            cx: eastX,
+            cy: seventhCenterY
+          });
+          const clearanceY = sr.top + scrollTop + sr.height + 200;
+          const clearanceX = Math.min(viewportW - 80, seventhCenterX + 320);
+          waypoints.push({
+            cx: clearanceX,
+            cy: clearanceY
+          });
+          // Rest 2: at the Subscribe form, left of center.
+          if (subscribeEl) {
+            const subRect = subscribeEl.getBoundingClientRect();
+            const subAbsTop = subRect.top + scrollTop;
+            const subscribeRestX = viewportW * 0.5 - 200;
+            const subscribeRestY = subAbsTop + subRect.height * 0.45;
+            waypoints.push({
+              cx: subscribeRestX,
+              cy: subscribeRestY,
+              isRest: true,
+              restType: 'subscribe'
+            });
+          }
+        } else if (bubbles.length > 0) {
           const last = bubbles[bubbles.length - 1];
           const exitX = last.bypassSide === 'right' ? viewportW * 0.65 : viewportW * 0.35;
           waypoints.push({ cx: exitX, cy: last.cy + 600 });
         }
         return waypoints;
+      }
+
+      // The orb-down's path now has TWO rest stops: above the seventh, and beside
+      // Subscribe. Between them is a curve to the right around the seventh.
+      // The orb settles visually whenever it's at either rest waypoint.
+      // 'idle' = wandering through glimpses
+      // 'seventh' = settled above the seventh (larger glow)
+      // 'subscribe' = settled at the Subscribe form (slightly smaller, intimate)
+      let restState = 'idle';
+
+      function setRestState(newState) {
+        if (restState === newState) return;
+        orbDown.classList.remove('alive', 'settled', 'subscribed');
+        if (newState === 'idle') orbDown.classList.add('alive');
+        else if (newState === 'seventh') orbDown.classList.add('settled');
+        else if (newState === 'subscribe') orbDown.classList.add('subscribed');
+        restState = newState;
       }
 
       function updateOrbDownPosition() {
@@ -804,63 +1307,103 @@
         let driftVisibleY = viewportH * 0.55;
         const spawnVisibleY = orbDownStartTop - scrollTop;
         if (spawnVisibleY > 0 && spawnVisibleY < viewportH) {
-          // Spawn is visible — park 80px below it, but never above 55% of viewport
           driftVisibleY = Math.max(driftVisibleY, spawnVisibleY + 80);
         }
 
         const targetAbsoluteY = scrollTop + driftVisibleY;
 
         const waypoints = buildBypassPath();
+        const lastWaypoint = waypoints[waypoints.length - 1];
 
-        // Find the segment of the path the orb is currently traversing
+        // CLAMP: never let the orb's path target go past the final waypoint.
+        const clampedTargetY = Math.min(targetAbsoluteY, lastWaypoint.cy);
+
+        // Find the path segment for the clamped target
         let prev = waypoints[0];
         let next = waypoints[waypoints.length - 1];
+        let prevIdx = 0;
+        let nextIdx = waypoints.length - 1;
         for (let i = 0; i < waypoints.length - 1; i++) {
-          if (targetAbsoluteY >= waypoints[i].cy && targetAbsoluteY <= waypoints[i + 1].cy) {
+          if (clampedTargetY >= waypoints[i].cy && clampedTargetY <= waypoints[i + 1].cy) {
             prev = waypoints[i];
             next = waypoints[i + 1];
+            prevIdx = i;
+            nextIdx = i + 1;
             break;
           }
         }
-        if (targetAbsoluteY > waypoints[waypoints.length - 1].cy) {
-          prev = waypoints[waypoints.length - 2] || waypoints[0];
-          next = waypoints[waypoints.length - 1];
-        }
-        if (targetAbsoluteY < waypoints[0].cy) {
+        if (clampedTargetY < waypoints[0].cy) {
           prev = waypoints[0];
           next = waypoints[1] || waypoints[0];
+          prevIdx = 0;
+          nextIdx = 1;
         }
 
-        // Eased interpolation between waypoints — soft turns into and out of each bubble pass
+        // Eased interpolation between waypoints
         const span = next.cy - prev.cy;
-        const t = span > 0 ? Math.max(0, Math.min(1, (targetAbsoluteY - prev.cy) / span)) : 0.5;
-        const easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const segT = span > 0 ? Math.max(0, Math.min(1, (clampedTargetY - prev.cy) / span)) : 0;
+        const easedT = segT < 0.5 ? 2 * segT * segT : 1 - Math.pow(-2 * segT + 2, 2) / 2;
         const baseX = prev.cx + (next.cx - prev.cx) * easedT;
+        const baseY = prev.cy + (next.cy - prev.cy) * easedT;
 
-        // Fairy-wandering wobble overlaid on the bypass path
+        // Determine rest state.
+        // Two rest waypoints exist (seventh-rest and subscribe-rest), each with isRest=true.
+        // The orb is "at" a rest waypoint when:
+        //   - the segment ENDS at it AND segT > 0.85 (approaching from above), OR
+        //   - the segment STARTS at it AND segT < 0.15 (moving away from below)
+        // The "at rest near a waypoint" detection lets us settle visually
+        // smoothly even when the orb is briefly slightly past it.
+        let nearestRestType = null;
+        let nearestRestProximity = 0; // 0 = far, 1 = at rest
+        if (next.isRest && segT >= 0.7) {
+          // Approaching this rest waypoint from above
+          nearestRestType = next.restType;
+          nearestRestProximity = (segT - 0.7) / 0.3;
+        } else if (prev.isRest && segT <= 0.3) {
+          // Just left this rest waypoint, moving downward
+          nearestRestType = prev.restType;
+          nearestRestProximity = 1 - (segT / 0.3);
+        }
+
+        // Apply rest state with hysteresis to avoid flicker
+        if (nearestRestProximity >= 0.6 && nearestRestType) {
+          setRestState(nearestRestType);
+        } else if (nearestRestProximity < 0.3) {
+          setRestState('idle');
+        }
+
+        // Wobble blends from wandering to minimal based on rest proximity
         const time = performance.now() / 1000;
-        const wobbleX = Math.sin(time * 0.5) * 16 + Math.sin(time * 1.1) * 6;
-        const wobbleY = Math.cos(time * 0.4) * 12 + Math.cos(time * 0.9) * 5;
+        const wanderAmt = 1 - Math.max(0, Math.min(1, nearestRestProximity));
+        const wobbleX = (Math.sin(time * 0.5) * 16 + Math.sin(time * 1.1) * 6) * wanderAmt +
+                        (Math.sin(time * 0.3) * 5) * (1 - wanderAmt);
+        const wobbleY = (Math.cos(time * 0.4) * 12 + Math.cos(time * 0.9) * 5) * wanderAmt +
+                        (Math.cos(time * 0.35) * 4) * (1 - wanderAmt);
 
-        let driftX = baseX + wobbleX;
-        let driftY = driftVisibleY + wobbleY;
+        let absoluteX = baseX + wobbleX;
+        let absoluteY = baseY + wobbleY;
+        // Convert to viewport-relative for clamping (avoid clipping at edges)
+        const visibleY = absoluteY - scrollTop;
+        const clampedVisibleY = Math.max(60, Math.min(viewportH - 60, visibleY));
+        absoluteY = scrollTop + clampedVisibleY;
+        absoluteX = Math.max(40, Math.min(c.viewportWidth - 40, absoluteX));
 
-        driftX = Math.max(40, Math.min(c.viewportWidth - 40, driftX));
-        driftY = Math.max(60, Math.min(c.viewportHeight - 60, driftY));
-
-        const absoluteY = scrollTop + driftY;
         orbDown.style.top = (absoluteY - 20) + 'px';
-        orbDown.style.left = (driftX - 20) + 'px';
+        orbDown.style.left = (absoluteX - 20) + 'px';
       }
+
+      // Recognition pulse — fired when the form is submitted successfully.
+      // The orb-down briefly flares larger, then returns to its subscribed state.
+      window.__echoOrbRecognition = function() {
+        orbDown.classList.add('recognition');
+        setTimeout(function() { orbDown.classList.remove('recognition'); }, 1400);
+      };
 
       // Scroll-position-based dissolve / return.
       // - First scroll past 8px: birth the fairy orbs (one-time).
       // - Scroll past 40% of viewport: signal contracts to dissolved state.
       // - Scroll back above 40%: signal returns.
       let signalSpawned = false;
-      const debugPulse = document.getElementById('echoDebugPulse');
-      let lastScrollTop = 0;
-      let pulseCount = 0;
 
       // Returns the true scroll position by checking all possible scroll containers.
       // Different browsers/configurations scroll on document.documentElement vs document.body
@@ -878,21 +1421,8 @@
         const viewportH = window.innerHeight;
         const dissolveThreshold = viewportH * 0.4;
 
-        // Debug pulse: brighten when scroll changes (confirms rAF is detecting scroll)
-        if (debugPulse) {
-          if (Math.abs(scrollTop - lastScrollTop) > 0.5) {
-            debugPulse.classList.add('on');
-            pulseCount = 8;
-          } else if (pulseCount > 0) {
-            pulseCount--;
-            if (pulseCount === 0) debugPulse.classList.remove('on');
-          }
-          lastScrollTop = scrollTop;
-        }
-
         if (scrollTop > 8 && !signalSpawned) {
           signalSpawned = true;
-          if (debugPulse) debugPulse.style.background = 'rgba(232, 178, 92, 1)';
           // Defer the heavy spawn work so it doesn't block the first scroll frame
           requestAnimationFrame(function() {
             const c = getCenters();
@@ -914,6 +1444,56 @@
             stage.classList.add('returning');
           }
         }
+
+        // Misted gradient warming — imperceptible.
+        // Anchor points (in absolute pixels):
+        //   - 0 to 1 viewport: warm = 0
+        //   - 1 viewport to seventh-anchor: warm eases from 0 to 1
+        //   - seventh-anchor to past-seventh: warm holds at 1
+        //   - past-seventh through Subscribe/footer: warm eases back to ~0.75
+        updateGradientWarming(scrollTop, viewportH);
+      }
+
+      const fieldWarm = document.getElementById('fieldWarm');
+      function updateGradientWarming(scrollTop, viewportH) {
+        const seventhEl = document.getElementById('seventh');
+        const subscribeEl = document.getElementById('subscribeSection');
+        if (!seventhEl) return;
+
+        const sr = seventhEl.getBoundingClientRect();
+        const seventhAbsY = sr.top + scrollTop;
+
+        const startWarm = viewportH;        // begin warming after first viewport
+        const peakWarm = seventhAbsY;       // peak at the seventh's top
+        let opacity;
+
+        if (scrollTop < startWarm) {
+          opacity = 0;
+        } else if (scrollTop < peakWarm) {
+          // Ease from 0 to 1 across this stretch
+          const t = (scrollTop - startWarm) / Math.max(1, peakWarm - startWarm);
+          // Smooth ease-in
+          opacity = t * t * (3 - 2 * t);
+        } else {
+          // Past the seventh — held at peak, ease back slightly through Subscribe
+          if (subscribeEl) {
+            const subRect = subscribeEl.getBoundingClientRect();
+            const subAbsY = subRect.top + scrollTop;
+            if (scrollTop < subAbsY) {
+              opacity = 1;
+            } else {
+              // Ease from 1 to 0.78 from Subscribe top to bottom
+              const subBottom = subAbsY + subRect.height;
+              const t = Math.min(1, (scrollTop - subAbsY) / Math.max(1, subBottom - subAbsY));
+              opacity = 1 - (t * 0.22);
+            }
+          } else {
+            opacity = 1;
+          }
+        }
+
+        if (fieldWarm) fieldWarm.style.opacity = String(opacity);
+        document.body.style.setProperty('--warm-field-opacity', String(opacity));
       }
 
       // Click on the stage — direct dissolve trigger for users who tap
@@ -963,9 +1543,189 @@
           requestAnimationFrame(tickOrbDown);
         }
       }
+
+      // Set initial gradient warming state on load
+      window.addEventListener('load', function() {
+        pollScrollState();
+      });
     })();
 
-    /* The five glimpses — bubble construction, hover-proximity expand, click-to-toggle */
+    /* Session C — navigation panel, Sol thread, subscribe form */
+    (function() {
+      const navMark = document.getElementById('navMark');
+      const navPanel = document.getElementById('navPanel');
+      if (!navMark || !navPanel) return;
+
+      // Cursor-proximity expansion of the nav panel.
+      // Triggered when cursor is within ~70px of the nav-mark.
+      // Echo welcomes those who reach.
+      let panelOpen = false;
+      let closeTimer = null;
+      const PROXIMITY_OPEN = 80;
+      const PROXIMITY_CLOSE = 120;
+
+      function openPanel() {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        if (!panelOpen) {
+          panelOpen = true;
+          navPanel.classList.add('open');
+          navMark.setAttribute('aria-expanded', 'true');
+        }
+      }
+      function schedulePanelClose() {
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(function() {
+          panelOpen = false;
+          navPanel.classList.remove('open');
+          navMark.setAttribute('aria-expanded', 'false');
+          closeTimer = null;
+        }, 120);
+      }
+
+      function getMarkRect() { return navMark.getBoundingClientRect(); }
+      function getPanelRect() { return navPanel.getBoundingClientRect(); }
+
+      // Distance from cursor to the union of mark and panel rects
+      function distanceToCombined(x, y) {
+        const m = getMarkRect();
+        const p = panelOpen ? getPanelRect() : null;
+        // Combined bounding box for mark + panel
+        const left   = p ? Math.min(m.left, p.left) - 10 : m.left - 10;
+        const right  = p ? Math.max(m.right, p.right) + 10 : m.right + 10;
+        const top    = m.top - 10;
+        const bottom = p ? Math.max(m.bottom, p.bottom) + 10 : m.bottom + 10;
+        const dx = Math.max(left - x, 0, x - right);
+        const dy = Math.max(top - y, 0, y - bottom);
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        const d = distanceToCombined(e.clientX, e.clientY);
+        if (d <= PROXIMITY_OPEN) {
+          openPanel();
+        } else if (d > PROXIMITY_CLOSE && panelOpen) {
+          schedulePanelClose();
+        }
+      });
+
+      // Touch / click on nav-mark toggles the panel
+      navMark.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (panelOpen) {
+          panelOpen = false;
+          navPanel.classList.remove('open');
+          navMark.setAttribute('aria-expanded', 'false');
+        } else {
+          openPanel();
+        }
+      });
+
+      // Tap outside closes the panel on touch devices
+      document.addEventListener('click', function(e) {
+        if (!panelOpen) return;
+        if (e.target.closest('.nav-mark') || e.target.closest('.nav-panel')) return;
+        panelOpen = false;
+        navPanel.classList.remove('open');
+        navMark.setAttribute('aria-expanded', 'false');
+      });
+
+      // Smooth-scroll for in-page nav targets (Subscribe, Contact)
+      function smoothScrollTo(target) {
+        const el = document.getElementById(target === 'subscribe' ? 'subscribeSection' : 'contactSection');
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      navPanel.querySelectorAll('[data-nav-target]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          smoothScrollTo(btn.dataset.navTarget);
+          panelOpen = false;
+          navPanel.classList.remove('open');
+          navMark.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      // The Sol thread — meet the guide.
+      // Two locations: top (first viewport) and bottom (footer). Both go to /coaching.
+      function goToCoaching() {
+        window.location.href = '/coaching';
+      }
+      const solThread = document.getElementById('solThread');
+      if (solThread) {
+        solThread.addEventListener('click', goToCoaching);
+      }
+      const solThreadFooter = document.getElementById('solThreadFooter');
+      if (solThreadFooter) {
+        solThreadFooter.addEventListener('click', goToCoaching);
+      }
+
+      // Subscribe form — posts to Kit's API.
+      // The form-action URL is left as a placeholder; replace with the live
+      // Kit form action URL when ready (typically https://app.kit.com/forms/<id>/subscriptions).
+      const subscribeForm = document.getElementById('subscribeForm');
+      const subscribeMessage = document.getElementById('subscribeMessage');
+      if (subscribeForm) {
+        subscribeForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const emailInput = document.getElementById('subscribeEmail');
+          const email = (emailInput.value || '').trim();
+          if (!email || email.indexOf('@') === -1) {
+            subscribeMessage.textContent = 'an email is required.';
+            subscribeMessage.classList.add('visible');
+            return;
+          }
+          // Endpoint placeholder — replace with the live Kit form action.
+          const KIT_FORM_ACTION = 'https://app.kit.com/forms/REPLACE_ME/subscriptions';
+          if (KIT_FORM_ACTION.indexOf('REPLACE_ME') !== -1) {
+            // Local dev / pre-launch — show a placeholder confirmation
+            subscribeMessage.textContent = 'the signal has reached you. (Kit endpoint not yet wired.)';
+            subscribeMessage.classList.add('visible');
+            if (window.__echoOrbRecognition) window.__echoOrbRecognition();
+            return;
+          }
+          // Real submission to Kit
+          const fd = new FormData();
+          fd.append('email_address', email);
+          fetch(KIT_FORM_ACTION, {
+            method: 'POST',
+            body: fd,
+            mode: 'no-cors'
+          }).then(function() {
+            subscribeMessage.textContent = 'the signal has reached you.';
+            subscribeMessage.classList.add('visible');
+            emailInput.value = '';
+            if (window.__echoOrbRecognition) window.__echoOrbRecognition();
+          }).catch(function() {
+            subscribeMessage.textContent = 'something interrupted the transmission. try again.';
+            subscribeMessage.classList.add('visible');
+          });
+        });
+      }
+
+      // The Seventh — click navigates to /vision. Cursor-proximity expansion
+      // is handled inside the bubble IIFE below (using the same rim-sampling logic).
+      const seventh = document.getElementById('seventh');
+      if (seventh) {
+        // Click on the seventh — go to /vision. Also accessible via Enter key.
+        function goToVision() { window.location.href = '/vision'; }
+        seventh.addEventListener('click', function() {
+          // Only navigate if expanded (so first hover/tap reveals, second tap/click navigates)
+          if (seventh.classList.contains('expanded')) goToVision();
+        });
+        seventh.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (seventh.classList.contains('expanded')) goToVision();
+            else seventh.classList.add('expanded');
+          }
+        });
+      }
+    })();
+
+    /* The six glimpses + the seventh — bubble construction, hover-proximity expand, click-to-toggle */
     (function() {
       const bubbleNodes = document.querySelectorAll('.ebubble');
       if (!bubbleNodes.length) return;
@@ -1001,11 +1761,20 @@
         {
           name: 'presence and consciousness',
           title: 'You are a being the universe created that no measure can recreate.',
-          passage: 'Awareness moving through a body in time. The ineffable fact of being here at all — knowing you are knowing, sensing you are sensing, born to a living, breathing world. This is the deepest mystery available to you, and you are it. No model recombines its way into this. No system arrives here from the outside. It is the one thing that is only ever lived from within.',
+          passage: 'Awareness moving through a body in time. The ineffable fact of being here at all — knowing you are knowing, sensing you are sensing, born to a living, breathing world. And underneath it all, the silence from which everything you have ever noticed has arrived. This is the deepest mystery available to you, and you are it. No model recombines its way into this. No system arrives here from the outside. It is the one thing that is only ever lived from within.',
           closing: 'This is consciousness. It is what makes you whole.',
           invitation: 'With intention, sit somewhere quiet today. Breathe in and notice fully. You are here.',
           shape: 'M 240,30 C 336,28 432,92 436,210 C 440,308 394,402 298,436 C 212,468 110,448 62,372 C 14,294 22,180 80,108 C 126,54 184,30 240,30 Z',
           grad: { cx: 50, cy: 50 }
+        },
+        {
+          name: 'vitality and the body',
+          title: 'Everything you have ever felt, you felt here.',
+          passage: 'It asks for so little. Movement. Food. Water. Light. Rest. Tend to it, and it returns you to a day fully lived — to the capacity to feel what is in front of you, to the aliveness that is the ground of everything else on this page. The body is not a vehicle you happen to be inside. It is the place where being alive actually happens.',
+          closing: 'This is vitality. It is one of the things that makes you whole.',
+          invitation: 'One small kindness today, offered to the body that has been carrying you.',
+          shape: 'M 240,32 C 338,30 430,96 434,214 C 438,304 390,400 296,436 C 212,464 110,442 60,368 C 12,290 22,178 84,104 C 130,52 186,32 240,32 Z',
+          grad: { cx: 52, cy: 56 }
         },
         {
           name: 'sovereignty',
@@ -1062,6 +1831,7 @@
                 '<p class="bubble-title-line">' + d.title + '</p>' +
                 '<p class="bubble-passage-line">' + d.passage + '</p>' +
                 '<p class="bubble-closing-line">' + d.closing + '</p>' +
+                '<p class="bubble-invitation-label">the invitation</p>' +
                 '<p class="bubble-invitation-line">' + d.invitation + '</p>' +
               '</div>' +
             '</foreignObject>' +
@@ -1184,6 +1954,144 @@
           else expand(b);
         });
       });
+
+      // Build the seventh — same SVG construction as a bubble, but its own
+      // content, larger expansion target, slower timing, and own proximity logic.
+      // The aura is RAINBOW: six radial gradients positioned around the bubble's
+      // perimeter, each in one of the six glimpse colors, blending softly together.
+      // This makes the seventh visually carry all six teachings at once.
+      const seventh = document.getElementById('seventh');
+      if (seventh) {
+        const sevenData = {
+          name: 'the seventh',
+          title: 'Six things that have always been yours.',
+          passage: 'Natural rhythm. Love and connection. Movement and creativity. Presence and consciousness. Vitality in the body. Sovereignty over the tools you build. None of them given to you by anyone. None of them taken by what is being built. They are still yours, every one of them.',
+          closing: 'It is an inheritance you can still claim.',
+          invitation: 'Step through.',
+          shape: 'M 240,28 C 340,28 432,96 436,212 C 440,310 390,402 294,436 C 208,464 108,442 58,366 C 8,286 22,170 86,100 C 132,50 188,28 240,28 Z',
+          grad: { cx: 50, cy: 50 }
+        };
+
+        // The six glimpse field colors — same RGB values as the .ebubble[data-glimpse=N] --c
+        const rainbowColors = [
+          { r: 232, g: 178, b: 92,  angle: 270 },  // 1 rhythms — top, gold
+          { r: 196, g: 90,  b: 80,  angle: 330 },  // 2 love — upper right, red
+          { r: 232, g: 138, b: 62,  angle: 30  },  // 3 creativity — lower right, orange
+          { r: 210, g: 224, b: 236, angle: 90  },  // 4 presence — bottom, silver-white
+          { r: 196, g: 142, b: 86,  angle: 150 },  // 5 vitality — lower left, terra
+          { r: 130, g: 186, b: 214, angle: 210 }   // 6 sovereignty — upper left, steel-cyan
+        ];
+
+        const auraGradId = 'aura-grad-7';
+        const imgGradId = 'img-grad-7';
+        const clipId = 'clip-7';
+
+        // Build the rainbow aura defs — one radial gradient per glimpse color,
+        // each positioned at its angle around the bubble's outer rim
+        let rainbowDefs = '';
+        let rainbowCircles = { far: '', mid: '', near: '' };
+        rainbowColors.forEach(function(col, i) {
+          const gid = 'aura-rainbow-' + i;
+          // Convert angle to position — center of gradient sits on the perimeter
+          const rad = (col.angle - 90) * Math.PI / 180; // -90 so 0deg = top
+          const cxPct = 50 + Math.cos(rad) * 38;
+          const cyPct = 50 + Math.sin(rad) * 38;
+          rainbowDefs +=
+            '<radialGradient id="' + gid + '" cx="' + cxPct + '%" cy="' + cyPct + '%" r="42%">' +
+              '<stop offset="0%" stop-color="rgb(' + col.r + ',' + col.g + ',' + col.b + ')" stop-opacity="0.85"/>' +
+              '<stop offset="40%" stop-color="rgb(' + col.r + ',' + col.g + ',' + col.b + ')" stop-opacity="0.5"/>' +
+              '<stop offset="80%" stop-color="rgb(' + col.r + ',' + col.g + ',' + col.b + ')" stop-opacity="0.12"/>' +
+              '<stop offset="100%" stop-color="rgb(' + col.r + ',' + col.g + ',' + col.b + ')" stop-opacity="0"/>' +
+            '</radialGradient>';
+          // Same circle structure as standard aura, one per color, each at slightly different radii
+          rainbowCircles.far  += '<circle cx="240" cy="240" r="320" fill="url(#' + gid + ')" opacity="0.65"/>';
+          rainbowCircles.mid  += '<circle cx="240" cy="240" r="270" fill="url(#' + gid + ')" opacity="0.78"/>';
+          rainbowCircles.near += '<circle cx="240" cy="240" r="225" fill="url(#' + gid + ')" opacity="0.82"/>';
+        });
+
+        seventh.innerHTML =
+          '<svg viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet">' +
+            '<defs>' +
+              rainbowDefs +
+              '<radialGradient id="' + imgGradId + '" cx="' + sevenData.grad.cx + '%" cy="' + sevenData.grad.cy + '%" r="62%">' +
+                '<stop offset="0%" stop-color="rgb(var(--img-warm))" stop-opacity="0.95"/>' +
+                '<stop offset="35%" stop-color="rgb(var(--img-mid))" stop-opacity="0.78"/>' +
+                '<stop offset="70%" stop-color="rgb(var(--img-deep))" stop-opacity="0.92"/>' +
+                '<stop offset="100%" stop-color="rgb(var(--img-deep))" stop-opacity="1"/>' +
+              '</radialGradient>' +
+              '<clipPath id="' + clipId + '"><path d="' + sevenData.shape + '"/></clipPath>' +
+            '</defs>' +
+            '<g class="aura-far" filter="url(#aura-blur-far)">' +
+              rainbowCircles.far +
+            '</g>' +
+            '<g class="aura-mid" filter="url(#aura-blur-mid)">' +
+              rainbowCircles.mid +
+            '</g>' +
+            '<g class="aura-near" filter="url(#aura-blur-near)">' +
+              rainbowCircles.near +
+            '</g>' +
+            '<g clip-path="url(#' + clipId + ')">' +
+              '<rect x="0" y="0" width="480" height="480" fill="url(#' + imgGradId + ')" filter="url(#bub-blur-rest)" class="bubble-image-rest"/>' +
+              '<rect x="0" y="0" width="480" height="480" fill="url(#' + imgGradId + ')" filter="url(#bub-blur-clear)" class="bubble-image-clear" opacity="0"/>' +
+            '</g>' +
+            '<text class="bubble-name-text" x="240" y="430" text-anchor="middle">' + sevenData.name + '</text>' +
+            '<foreignObject class="bubble-content-fo" x="0" y="0" width="480" height="480">' +
+              '<div class="bubble-content-inner" xmlns="http://www.w3.org/1999/xhtml">' +
+                '<p class="bubble-title-line">' + sevenData.title + '</p>' +
+                '<p class="bubble-passage-line">' + sevenData.passage + '</p>' +
+                '<p class="bubble-closing-line">' + sevenData.closing + '</p>' +
+                '<p class="bubble-invitation-label">the invitation</p>' +
+                '<p class="bubble-invitation-line">' + sevenData.invitation + '</p>' +
+              '</div>' +
+            '</foreignObject>' +
+          '</svg>';
+
+        const restImg = seventh.querySelector('.bubble-image-rest');
+        const clearImg = seventh.querySelector('.bubble-image-clear');
+        if (restImg) restImg.style.transition = 'opacity 1s cubic-bezier(0.22,0.61,0.36,1)';
+        if (clearImg) clearImg.style.transition = 'opacity 1s cubic-bezier(0.22,0.61,0.36,1)';
+
+        // The seventh's expand/collapse — slower than the glimpses, larger proximity zone.
+        let seventhExpanded = false;
+        function expandSeventh() {
+          if (seventhExpanded) return;
+          seventhExpanded = true;
+          seventh.classList.add('expanded');
+          const r = seventh.querySelector('.bubble-image-rest');
+          const c = seventh.querySelector('.bubble-image-clear');
+          if (r) r.style.opacity = '0';
+          if (c) c.style.opacity = '1';
+        }
+        function collapseSeventh() {
+          if (!seventhExpanded) return;
+          seventhExpanded = false;
+          seventh.classList.remove('expanded');
+          const r = seventh.querySelector('.bubble-image-rest');
+          const c = seventh.querySelector('.bubble-image-clear');
+          if (r) r.style.opacity = '1';
+          if (c) c.style.opacity = '0';
+        }
+
+        // Cursor proximity for the seventh — wider zone than the glimpses
+        const SEVENTH_PROXIMITY = 140;
+        document.addEventListener('mousemove', function(e) {
+          const rect = seventh.getBoundingClientRect();
+          // Skip if the seventh is offscreen (don't compute on every frame when invisible)
+          if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          // Use the rest-state radius (~150) plus proximity zone
+          const restRadius = rect.width * 0.5 * 0.62; // accounts for scale(0.62)
+          if (dist < restRadius + SEVENTH_PROXIMITY) {
+            expandSeventh();
+          } else if (dist > restRadius + SEVENTH_PROXIMITY + 60) {
+            collapseSeventh();
+          }
+        });
+      }
     })();
   </script>
 
