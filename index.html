@@ -636,7 +636,7 @@
       function getCenters() {
         const sigRect = signalWrap.getBoundingClientRect();
         const navRect = navMark.getBoundingClientRect();
-        const scrollTop = window.scrollY || window.pageYOffset;
+        const scrollTop = getTrueScrollTop();
         return {
           sigX: sigRect.left + sigRect.width / 2,
           sigY: sigRect.top + sigRect.height / 2 + scrollTop,
@@ -725,7 +725,7 @@
       let cachedBubblePositions = null;
       let cachedBubblePositionsAtScroll = -1;
       function getBubbleAbsolutePositions() {
-        const scrollTop = window.scrollY || window.pageYOffset;
+        const scrollTop = getTrueScrollTop();
         if (cachedBubblePositions !== null && Math.abs(cachedBubblePositionsAtScroll - scrollTop) < 5) {
           return cachedBubblePositions;
         }
@@ -774,7 +774,7 @@
       function updateOrbDownPosition() {
         if (!orbDownTracking) return;
         const c = getCenters();
-        const scrollTop = window.scrollY || window.pageYOffset || 0;
+        const scrollTop = getTrueScrollTop();
         const viewportH = c.viewportHeight;
 
         // The orb sits at 55% of the viewport while scrolling.
@@ -839,8 +839,20 @@
       const debugPulse = document.getElementById('echoDebugPulse');
       let lastScrollTop = 0;
       let pulseCount = 0;
+
+      // Returns the true scroll position by checking all possible scroll containers.
+      // Different browsers/configurations scroll on document.documentElement vs document.body
+      // vs window itself. We take whichever is actually moving.
+      function getTrueScrollTop() {
+        const a = window.scrollY || 0;
+        const b = window.pageYOffset || 0;
+        const c = document.documentElement ? document.documentElement.scrollTop || 0 : 0;
+        const d = document.body ? document.body.scrollTop || 0 : 0;
+        return Math.max(a, b, c, d);
+      }
+
       function pollScrollState() {
-        const scrollTop = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+        const scrollTop = getTrueScrollTop();
         const viewportH = window.innerHeight;
         const dissolveThreshold = viewportH * 0.4;
 
@@ -892,7 +904,11 @@
 
       // Scroll listener kicks off polling — we still listen for scroll to be responsive,
       // but the rAF loop is the source of truth and runs continuously.
+      // Listen on both window and document to catch whichever scroll target the browser uses.
       window.addEventListener('scroll', pollScrollState, { passive: true });
+      document.addEventListener('scroll', pollScrollState, { passive: true });
+      window.addEventListener('wheel', pollScrollState, { passive: true });
+      window.addEventListener('touchmove', pollScrollState, { passive: true });
 
       // Click anywhere on the stage (except the nav) triggers the fairy orbs immediately
       stage.addEventListener('click', function(e) {
