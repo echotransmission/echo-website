@@ -1678,18 +1678,20 @@
             return;
           }
           // Endpoint placeholder — replace with the live Kit form action.
-          const KIT_FORM_ACTION = 'https://app.kit.com/forms/REPLACE_ME/subscriptions';
-          if (KIT_FORM_ACTION.indexOf('REPLACE_ME') !== -1) {
+          const MAILERLITE_FORM_ACTION = 'https://assets.mailerlite.com/jsonp/2334647/forms/187108614086853982/subscribe';
+          if (MAILERLITE_FORM_ACTION.indexOf('REPLACE_ME') !== -1) {
             // Local dev / pre-launch — show a placeholder confirmation
             subscribeMessage.textContent = 'the signal has reached you. (Kit endpoint not yet wired.)';
             subscribeMessage.classList.add('visible');
             if (window.__echoOrbRecognition) window.__echoOrbRecognition();
             return;
           }
-          // Real submission to Kit
+          // Real submission to MailerLite
           const fd = new FormData();
-          fd.append('email_address', email);
-          fetch(KIT_FORM_ACTION, {
+          fd.append('fields[email]', email);
+          fd.append('ml-submit', '1');
+          fd.append('anticsrf', 'true');
+          fetch(MAILERLITE_FORM_ACTION, {
             method: 'POST',
             body: fd,
             mode: 'no-cors'
