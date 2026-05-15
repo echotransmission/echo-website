@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Vision — Echo</title>
+  <meta name="description" content="The world that is possible.">
+  <meta name="theme-color" content="#1a2620">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: #1a2620;
+      color: #f5ecd9;
+      font-family: 'Fraunces', Georgia, serif;
+      overflow-x: hidden;
+    }
+
+    body {
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* ========== Navigation ==========*/
+    .nav-mark {
+      position: fixed;
+      top: 30px;
+      right: 36px;
+      width: 28px;
+      height: 36px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.5;
+      transition: opacity 0.6s ease-out, gap 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .nav-mark:hover,
+    .nav-mark:focus-visible {
+      opacity: 1;
+      gap: 7px;
+      outline: none;
+    }
+
+    .nav-mark .nav-dot {
+      display: block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(245, 236, 217, 0.65);
+      transition: background 1.4s ease-out;
+    }
+
+    .nav-panel {
+      position: fixed;
+      top: 76px;
+      right: 36px;
+      z-index: 99;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .nav-panel.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .nav-item {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.75);
+      background: transparent;
+      border: none;
+      padding: 4px 2px;
+      cursor: pointer;
+      text-decoration: none;
+      opacity: 0;
+      transform: translateX(8px);
+      transition:
+        opacity 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+        color 0.4s ease-out,
+        text-shadow 0.4s ease-out;
+      will-change: opacity, transform;
+    }
+
+    .nav-panel.open .nav-item {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .nav-panel.open .nav-item:nth-child(1) { transition-delay: 0ms; }
+    .nav-panel.open .nav-item:nth-child(2) { transition-delay: 100ms; }
+    .nav-panel:not(.open) .nav-item { transition-delay: 0ms; }
+
+    .nav-item:hover,
+    .nav-item:focus-visible {
+      color: #f6dcaa;
+      text-shadow: 0 0 14px rgba(246, 220, 170, 0.35);
+      transform: translateX(0) scale(1.05);
+      outline: none;
+    }
+
+    /* ========== Hero / held moment ==========*/
+    .held-moment {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .visual-container {
+      position: relative;
+      width: 100%;
+      max-width: 760px;
+      height: 480px;
+      margin: 0 auto;
+    }
+
+    .visual-container svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .held-text {
+      max-width: 540px;
+      margin: 3rem auto 0;
+      padding: 0 2rem;
+      text-align: center;
+    }
+
+    .held-text p {
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-size: 1.25rem;
+      line-height: 1.75;
+      color: #f5ecd9;
+      font-weight: 300;
+      margin: 0 0 1.25rem;
+      letter-spacing: 0.01em;
+    }
+
+    .held-text p:last-child {
+      color: rgba(245, 236, 217, 0.75);
+      margin-bottom: 0;
+    }
+
+    /* ========== Pause ==========*/
+    .pause {
+      height: 14vh;
+      min-height: 100px;
+      z-index: 1;
+    }
+
+    /* ========== Lower section ==========*/
+    .lower-section {
+      padding: 0 2rem 6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5rem;
+      z-index: 1;
+      position: relative;
+    }
+
+    .subscribe-block {
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .subscribe-framing {
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: rgba(245, 236, 217, 0.78);
+      font-weight: 300;
+      margin: 0 0 2rem;
+      letter-spacing: 0.005em;
+    }
+
+    .subscribe-form {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .subscribe-form::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(150, 225, 235, 0.12) 0%, rgba(150, 225, 235, 0.04) 50%, transparent 80%);
+      pointer-events: none;
+      filter: blur(20px);
+      z-index: -1;
+    }
+
+    .subscribe-input {
+      width: 100%;
+      max-width: 380px;
+      padding: 12px 4px;
+      background: transparent;
+      border: none;
+      border-bottom: 0.5px solid rgba(245, 236, 217, 0.4);
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 16px;
+      color: #f5ecd9;
+      text-align: center;
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.5s ease-out;
+    }
+
+    .subscribe-input::placeholder {
+      color: rgba(245, 236, 217, 0.36);
+      font-style: italic;
+    }
+
+    .subscribe-input:focus {
+      border-bottom-color: rgba(180, 235, 245, 0.7);
+    }
+
+    .subscribe-button {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.32em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.78);
+      background: transparent;
+      border: none;
+      padding: 6px 4px;
+      cursor: pointer;
+      transition: color 0.5s ease-out, text-shadow 0.5s ease-out;
+    }
+
+    .subscribe-button:hover,
+    .subscribe-button:focus-visible {
+      color: #f6dcaa;
+      text-shadow: 0 0 14px rgba(246, 220, 170, 0.4);
+      outline: none;
+    }
+
+    .subscribe-message {
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 14px;
+      color: rgba(180, 235, 245, 0.85);
+      margin: 24px 0 0;
+      min-height: 22px;
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+    }
+
+    .subscribe-message.visible {
+      opacity: 1;
+    }
+
+    /* ========== Sol thread (Meet the Guide) ==========*/
+    .sol-thread {
+      position: relative;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.42em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.78);
+      background: transparent;
+      border: none;
+      padding: 6px 8px;
+      cursor: pointer;
+      display: inline-block;
+      text-decoration: none;
+      text-shadow: 0 0 12px rgba(245, 236, 217, 0.15);
+      transition: color 0.4s ease-out, text-shadow 0.4s ease-out, transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), letter-spacing 0.4s ease-out;
+      transform-origin: center center;
+    }
+
+    .sol-thread:hover,
+    .sol-thread:focus-visible {
+      color: rgba(246, 220, 170, 1);
+      text-shadow: 0 0 22px rgba(246, 220, 170, 0.6), 0 0 40px rgba(246, 220, 170, 0.25);
+      transform: scale(1.16);
+      letter-spacing: 0.46em;
+      outline: none;
+    }
+
+    .sol-thread-footer {
+      position: relative;
+      right: auto;
+      bottom: auto;
+      opacity: 1;
+      margin: 0 0 22px;
+    }
+
+    /* ========== Footer ==========*/
+    .echo-footer {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 60px 24px 80px;
+      text-align: center;
+      font-family: 'Fraunces', Georgia, serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      text-transform: lowercase;
+      color: rgba(245, 236, 217, 0.55);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .echo-footer p {
+      margin: 0;
+    }
+
+    /* ========== Responsive ==========*/
+    @media (max-width: 640px) {
+      .nav-mark {
+        top: 1.25rem;
+        right: 1.25rem;
+        width: 24px;
+        height: 32px;
+      }
+
+      .held-moment {
+        padding: 5rem 1.25rem 3rem;
+      }
+
+      .visual-container {
+        height: 380px;
+      }
+
+      .held-text p {
+        font-size: 1.1rem;
+      }
+
+      .subscribe-framing {
+        font-size: 0.95rem;
+      }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="sr-only">The Vision — Echo</h1>
+
+  <!-- Navigation mark and panel -->
+  <button class="nav-mark" id="navMark" aria-label="Open navigation" aria-expanded="false">
+    <span class="nav-dot" aria-hidden="true"></span>
+    <span class="nav-dot" aria-hidden="true"></span>
+    <span class="nav-dot" aria-hidden="true"></span>
+  </button>
+
+  <nav class="nav-panel" id="navPanel" aria-label="Site navigation">
+    <a class="nav-item" href="/">Return to Signal</a>
+    <a class="nav-item" href="https://innatecadence.com">Meet the Guide</a>
+  </nav>
+
+  <!-- The held moment: visual + text -->
+  <section class="held-moment">
+    <div class="visual-container">
+      <svg viewBox="0 0 680 480" preserveAspectRatio="xMidYMid slice" role="img" id="visionSvg">
+        <title>The cadence of life</title>
+        <desc>A heartbeat pulse with wave-textured ripples layered over undulating waves of natural rhythm.</desc>
+
+        <defs>
+          <radialGradient id="heartCore" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f4a89a" stop-opacity="0.95"/>
+            <stop offset="35%" stop-color="#c8584a" stop-opacity="0.75"/>
+            <stop offset="70%" stop-color="#8c2e28" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#5a1a18" stop-opacity="0"/>
+          </radialGradient>
+
+          <radialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#e87767" stop-opacity="0.5"/>
+            <stop offset="50%" stop-color="#a83a30" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#5a1a18" stop-opacity="0"/>
+          </radialGradient>
+
+          <linearGradient id="waveStrokeA" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8c2e28" stop-opacity="0"/>
+            <stop offset="18%" stop-color="#b8463a" stop-opacity="0.55"/>
+            <stop offset="50%" stop-color="#e07868" stop-opacity="0.8"/>
+            <stop offset="82%" stop-color="#b8463a" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="#8c2e28" stop-opacity="0"/>
+          </linearGradient>
+
+          <linearGradient id="waveStrokeB" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6b2018" stop-opacity="0"/>
+            <stop offset="22%" stop-color="#9c3528" stop-opacity="0.45"/>
+            <stop offset="50%" stop-color="#c25a48" stop-opacity="0.7"/>
+            <stop offset="78%" stop-color="#9c3528" stop-opacity="0.45"/>
+            <stop offset="100%" stop-color="#6b2018" stop-opacity="0"/>
+          </linearGradient>
+
+          <linearGradient id="waveStrokeC" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#7a2820" stop-opacity="0"/>
+            <stop offset="25%" stop-color="#a83a30" stop-opacity="0.35"/>
+            <stop offset="50%" stop-color="#d46b5a" stop-opacity="0.55"/>
+            <stop offset="75%" stop-color="#a83a30" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#7a2820" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <path id="waveA" d="" fill="none" stroke="url(#waveStrokeA)" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+        <path id="waveB" d="" fill="none" stroke="url(#waveStrokeB)" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+        <path id="waveC" d="" fill="none" stroke="url(#waveStrokeC)" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+
+        <path id="rippleA" d="" fill="none" stroke="#d46b5a" stroke-width="1.4" opacity="0.5"/>
+        <path id="rippleB" d="" fill="none" stroke="#b8463a" stroke-width="1.0" opacity="0.4"/>
+        <path id="rippleC" d="" fill="none" stroke="#9c3528" stroke-width="0.7" opacity="0.3"/>
+
+        <g style="transform-origin: 340px 240px; animation: glow 1.4s ease-in-out infinite;">
+          <circle cx="340" cy="240" r="180" fill="url(#heartGlow)"/>
+        </g>
+
+        <g style="transform-origin: 340px 240px; animation: heartbeat 1.4s ease-in-out infinite;">
+          <circle cx="340" cy="240" r="95" fill="url(#heartCore)"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="held-text">
+      <p>Your ongoing presence here makes this world evolve.</p>
+      <p>Return when you can.</p>
+      <p>What is possible takes time to arrive.</p>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <div class="pause"></div>
+
+  <!-- Lower section: subscribe + Meet the Guide -->
+  <section class="lower-section">
+
+    <div class="subscribe-block">
+      <p class="subscribe-framing">
+        The transmissions continue. If the signal is reaching you, the rest arrives by email.
+      </p>
+
+      <form class="subscribe-form" id="subscribeForm" novalidate>
+        <input
+          type="email"
+          class="subscribe-input"
+          id="subscribeEmail"
+          name="email_address"
+          placeholder="your email"
+          required
+          autocomplete="email"
+          aria-label="Email address">
+        <button type="submit" class="subscribe-button">receive the signal</button>
+      </form>
+      <p class="subscribe-message" id="subscribeMessage" role="status" aria-live="polite"></p>
+    </div>
+
+    <a href="https://innatecadence.com" class="sol-thread">Meet the Guide</a>
+
+  </section>
+
+  <!-- Footer -->
+  <footer class="echo-footer">
+    <p>echo · echo@echotransmission.com</p>
+  </footer>
+
+  <!-- SVG keyframes for the heartbeat and glow animations -->
+  <style>
+    @keyframes heartbeat {
+      0%   { transform: scale(0.92); opacity: 0.78; }
+      8%   { transform: scale(1.08); opacity: 1; }
+      16%  { transform: scale(0.96); opacity: 0.85; }
+      24%  { transform: scale(1.04); opacity: 0.95; }
+      36%  { transform: scale(0.92); opacity: 0.78; }
+      100% { transform: scale(0.92); opacity: 0.78; }
+    }
+
+    @keyframes glow {
+      0%   { transform: scale(0.85); opacity: 0.5; }
+      8%   { transform: scale(1.05); opacity: 0.85; }
+      24%  { transform: scale(0.98); opacity: 0.7; }
+      36%  { transform: scale(0.85); opacity: 0.5; }
+      100% { transform: scale(0.85); opacity: 0.5; }
+    }
+  </style>
+
+  <!-- Wave and ripple animation script -->
+  <script>
+    (function() {
+      const svg = document.getElementById('visionSvg');
+      if (!svg) return;
+
+      const waveA = document.getElementById('waveA');
+      const waveB = document.getElementById('waveB');
+      const waveC = document.getElementById('waveC');
+      const rippleA = document.getElementById('rippleA');
+      const rippleB = document.getElementById('rippleB');
+      const rippleC = document.getElementById('rippleC');
+
+      const width = 680;
+      const centerX = 340;
+      const centerY = 240;
+      const steps = 80;
+      const ripplePoints = 96;
+      const rippleCycle = 1.4;
+      const minRadius = 32;
+      const maxRadius = 272;
+
+      function buildWavePath(time, amplitude, frequency, speed, phaseOffset, yOffset) {
+        let d = '';
+        for (let i = 0; i <= steps; i++) {
+          const x = (i / steps) * width;
+          const envelope = Math.sin((i / steps) * Math.PI);
+          const wave1 = Math.sin((x / width) * Math.PI * frequency + time * speed + phaseOffset);
+          const wave2 = Math.sin((x / width) * Math.PI * frequency * 0.5 + time * speed * 0.7 + phaseOffset) * 0.4;
+          const y = centerY + yOffset + (wave1 + wave2) * amplitude * envelope;
+          d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+        }
+        return d;
+      }
+
+      function buildRipplePath(time, phaseInCycle, waveFreq, waveAmp, wavePhase) {
+        const progress = phaseInCycle;
+        const eased = 1 - Math.pow(1 - progress, 2.2);
+        const baseRadius = minRadius + (maxRadius - minRadius) * eased;
+        const opacity = progress < 0.1
+          ? progress / 0.1
+          : Math.pow(1 - progress, 1.4);
+
+        let d = '';
+        for (let i = 0; i <= ripplePoints; i++) {
+          const angle = (i / ripplePoints) * Math.PI * 2;
+          const wave1 = Math.sin(angle * waveFreq + time * 4 + wavePhase);
+          const wave2 = Math.sin(angle * waveFreq * 0.5 - time * 2.5 + wavePhase) * 0.5;
+          const ampScale = 0.5 + eased * 0.7;
+          const r = baseRadius + (wave1 + wave2) * waveAmp * ampScale;
+          const x = centerX + Math.cos(angle) * r;
+          const y = centerY + Math.sin(angle) * r;
+          d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1) + ' ';
+        }
+        d += 'Z';
+        return { d, opacity };
+      }
+
+      function updateRipple(el, time, offsetSeconds, baseOpacity, waveFreq, waveAmp, wavePhase) {
+        const cycleTime = ((time - offsetSeconds) % rippleCycle + rippleCycle) % rippleCycle;
+        const phaseInCycle = cycleTime / rippleCycle;
+        const result = buildRipplePath(time, phaseInCycle, waveFreq, waveAmp, wavePhase);
+        el.setAttribute('d', result.d);
+        el.setAttribute('opacity', (result.opacity * baseOpacity).toFixed(3));
+      }
+
+      let start = null;
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        const t = (timestamp - start) / 1000;
+
+        waveA.setAttribute('d', buildWavePath(t, 28, 3.2, 1.15, 0, 0));
+        waveB.setAttribute('d', buildWavePath(t, 22, 2.6, 0.9, 1.8, -8));
+        waveC.setAttribute('d', buildWavePath(t, 18, 4.0, 1.4, 3.4, 10));
+
+        updateRipple(rippleA, t, 0,    0.7,  7,  6, 0);
+        updateRipple(rippleB, t, 0.18, 0.55, 9,  5, 1.6);
+        updateRipple(rippleC, t, 0.36, 0.45, 11, 4, 3.0);
+
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    })();
+  </script>
+
+  <!-- Navigation and form interaction script -->
+  <script>
+    (function() {
+      // Navigation toggle
+      const navMark = document.getElementById('navMark');
+      const navPanel = document.getElementById('navPanel');
+
+      if (navMark && navPanel) {
+        navMark.addEventListener('click', function() {
+          navPanel.classList.toggle('open');
+          navMark.setAttribute('aria-expanded', navPanel.classList.contains('open'));
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!navMark.contains(e.target) && !navPanel.contains(e.target)) {
+            navPanel.classList.remove('open');
+            navMark.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      // Subscribe form
+      const subscribeForm = document.getElementById('subscribeForm');
+      const subscribeMessage = document.getElementById('subscribeMessage');
+      if (subscribeForm) {
+        subscribeForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const emailInput = document.getElementById('subscribeEmail');
+          const email = (emailInput.value || '').trim();
+          if (!email || email.indexOf('@') === -1) {
+            subscribeMessage.textContent = 'an email is required.';
+            subscribeMessage.classList.add('visible');
+            return;
+          }
+          const MAILERLITE_FORM_ACTION = 'https://assets.mailerlite.com/jsonp/2334647/forms/187108614086853982/subscribe';
+          const fd = new FormData();
+          fd.append('fields[email]', email);
+          fd.append('ml-submit', '1');
+          fd.append('anticsrf', 'true');
+          fetch(MAILERLITE_FORM_ACTION, {
+            method: 'POST',
+            body: fd,
+            mode: 'no-cors'
+          }).then(function() {
+            subscribeMessage.textContent = 'the signal has reached you.';
+            subscribeMessage.classList.add('visible');
+            emailInput.value = '';
+            if (typeof window.__echoOrbRecognition === 'function') {
+              window.__echoOrbRecognition();
+            }
+          }).catch(function() {
+            subscribeMessage.textContent = 'something interrupted the transmission. try again.';
+            subscribeMessage.classList.add('visible');
+          });
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
