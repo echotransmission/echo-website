@@ -302,6 +302,7 @@
       border: none;
       padding: 0;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       z-index: 100;
       display: flex;
       flex-direction: column;
@@ -379,6 +380,26 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+      /* Prevent iOS Safari from absorbing taps before the panel appears */
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (max-width: 720px) {
+      .nav-mark {
+        top: 22px;
+        right: 24px;
+        width: 48px;
+        height: 48px;
+        padding: 8px;
+      }
+      .nav-panel {
+        top: 78px;
+        right: 20px;
+        gap: 18px;
+      }
+      .nav-panel .nav-item {
+        font-size: 15px;
+        padding: 8px 4px;
+      }
     }
     .nav-panel.open {
       opacity: 1;
@@ -1667,6 +1688,27 @@
       // Avoids triggering layout reflow on every animation frame.
       let cachedBubblePositions = null;
       let cachedBubblePositionsAtScroll = -1;
+
+      // Cache for the full bypass waypoint path — invalidated on scroll/resize.
+      // The path doesn't actually change between scroll events, so rebuilding it
+      // every animation frame is wasted work. Rebuilding on scroll/resize keeps
+      // the orb correctly positioned without thrashing the main thread.
+      let cachedBypassPath = null;
+      let cachedBypassPathScrollTop = -9999;
+      function getCachedBypassPath() {
+        const scrollTop = getTrueScrollTop();
+        if (cachedBypassPath !== null && Math.abs(cachedBypassPathScrollTop - scrollTop) < 30) {
+          return cachedBypassPath;
+        }
+        cachedBypassPath = buildBypassPath();
+        cachedBypassPathScrollTop = scrollTop;
+        return cachedBypassPath;
+      }
+      window.addEventListener('resize', function() {
+        cachedBypassPath = null;
+        cachedBubblePositions = null;
+      });
+
       function getBubbleAbsolutePositions() {
         const scrollTop = getTrueScrollTop();
         if (cachedBubblePositions !== null && Math.abs(cachedBubblePositionsAtScroll - scrollTop) < 5) {
@@ -1851,7 +1893,7 @@
 
         const targetAbsoluteY = scrollTop + driftVisibleY;
 
-        const waypoints = buildBypassPath();
+        const waypoints = getCachedBypassPath();
         const lastWaypoint = waypoints[waypoints.length - 1];
 
         // CLAMP: never let the orb's path target go past the final waypoint.
@@ -2100,10 +2142,18 @@
 
       // The rAF loop only runs once orb-down is alive — it keeps the orb breathing
       // and wobbling continuously. Before spawn, scroll events alone drive everything.
+      // On mobile / smaller viewports, throttle to ~30fps to reduce CPU load
+      // without visibly affecting the orb's slow movement.
       let rafRunning = false;
-      function tickOrbDown() {
+      const isMobileViewport = window.matchMedia('(max-width: 720px)').matches;
+      const frameInterval = isMobileViewport ? 33 : 0;
+      let lastFrameTime = 0;
+      function tickOrbDown(now) {
         if (orbDownTracking) {
-          updateOrbDownPosition();
+          if (!now || (now - lastFrameTime) >= frameInterval) {
+            updateOrbDownPosition();
+            lastFrameTime = now || performance.now();
+          }
           requestAnimationFrame(tickOrbDown);
         } else {
           rafRunning = false;
@@ -2183,9 +2233,16 @@
         }
       });
 
-      // Touch / click on nav-mark toggles the panel
-      navMark.addEventListener('click', function(e) {
-        e.stopPropagation();
+      // Touch / click on nav-mark toggles the panel.
+      // On touch devices the `click` event can be preceded by a synthetic
+      // `mousemove` from the first IIFE's stage click handler. We listen for
+      // both pointerup and click to be sure we catch the tap.
+      function toggleNavPanel(e) {
+        if (e) {
+          e.stopPropagation();
+          // Prevent the synthetic click that iOS fires after touchend
+          if (e.type === 'touchend') e.preventDefault();
+        }
         if (panelOpen) {
           panelOpen = false;
           navPanel.classList.remove('open');
@@ -2193,7 +2250,11 @@
         } else {
           openPanel();
         }
-      });
+      }
+      // On touch devices, touchend fires immediately and bypasses iOS's
+      // gesture-classification delay. Click is the fallback for desktop / mouse.
+      navMark.addEventListener('touchend', toggleNavPanel);
+      navMark.addEventListener('click', toggleNavPanel);
 
       // Tap outside closes the panel on touch devices
       document.addEventListener('click', function(e) {
