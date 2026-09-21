@@ -1420,8 +1420,6 @@
     </p>
 
     <p class="scroll-hint" id="scrollHint" aria-hidden="true">scroll</p>
-
-    <button class="sol-thread" id="solThread" aria-label="Meet the guide">meet the guide</button>
   </section>
 
   <button class="nav-mark" id="navMark" aria-label="Open navigation" aria-expanded="false">
@@ -1432,7 +1430,6 @@
 
   <nav class="nav-panel" id="navPanel" aria-label="Site navigation">
     <a class="nav-item" href="/vision">vision</a>
-    <a class="nav-item" href="https://innatecadence.com">coaching</a>
     <button class="nav-item" type="button" data-nav-target="subscribe">subscribe</button>
     <button class="nav-item" type="button" data-nav-target="contact">contact</button>
   </nav>
@@ -1533,7 +1530,6 @@
   </section>
 
   <footer class="echo-footer" id="contactSection">
-    <button class="sol-thread sol-thread-footer" id="solThreadFooter" aria-label="Meet the guide">meet the guide</button>
     <p>echo · echo@echotransmission.com</p>
   </footer>
 
@@ -2280,20 +2276,6 @@
           navMark.setAttribute('aria-expanded', 'false');
         });
       });
-
-      // The Sol thread — meet the guide.
-      // Two locations: top (first viewport) and bottom (footer). Both go to innatecadence.com.
-      function goToCoaching() {
-        window.location.href = 'https://innatecadence.com';
-      }
-      const solThread = document.getElementById('solThread');
-      if (solThread) {
-        solThread.addEventListener('click', goToCoaching);
-      }
-      const solThreadFooter = document.getElementById('solThreadFooter');
-      if (solThreadFooter) {
-        solThreadFooter.addEventListener('click', goToCoaching);
-      }
 
       // Subscribe form — posts to Kit's API.
       // The form-action URL is left as a placeholder; replace with the live
